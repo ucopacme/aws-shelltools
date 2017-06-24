@@ -1,0 +1,77 @@
+#aws auto complete
+#complete -C '/usr/local/aws/bin/aws_completer' aws
+
+aws-conf()
+	#configure aws cli and add alias
+	{
+	echo  "setting up aws cli config"
+	aws configure
+	echo  "setting up aws alias"
+	mkdir -p ~/.aws/cli
+	if [ -z "$1" ]
+		then
+		aliasdir="/usr/local/aws/alias"
+		else
+		aliasdir=$1
+		fi
+	ln -s $aliasdir ~/.aws/cli/alias
+	git config --global credential.helper '!aws codecommit credential-helper $@'
+	git config --global credential.UseHttpPath true
+	}
+
+
+aws-mfa()
+	{
+	read -p "please enter 6 digit  otp for default aws account: " awsotp
+	eval `aws mfacli $awsotp`
+	aws-set-account default
+	}
+
+aws-set-account()
+	{
+	if [ -z "$1" ]
+		then
+		account="default"
+		else
+		account=$1
+	fi
+	eval `aws setcred $account`
+	export AWS_ACCOUNT=$account
+	export AWS_USER=`aws cwu`
+	}
+
+aws-set-tokens()
+	{
+	#become default aws user
+	account=$AWS_ACCOUNT
+	aws-set-account default
+	#iterate over accounts and cache tokens in memory
+	eval `aws setronincreds roam`
+	aws-set-account $account
+	}
+
+aws-date-token()
+	#report token expriration for account
+	{
+	echo -ne "Token for $i account expires "
+	eval date -d `aws datecred $1`
+	}
+
+aws-loop()
+	#report token expriration for account
+	{
+	for i in `aws accountnames`;
+		do
+		accountname=$i
+		echo -e "executing  \033[7m $@ \033[0m  in account $accountname";
+		echo
+		aws-set-account $i
+		$@
+		echo
+		done
+	}
+
+alias aws-set-alias="cp -a ~/devops/aws/admin/alias ~/.aws/cli/"
+
+#export PS1="[\$(aws cwu) \w] "
+export PS1="\$AWS_USER: \w "

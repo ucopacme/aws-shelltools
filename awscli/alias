@@ -1,0 +1,332 @@
+[toplevel]
+
+
+# source functions
+func = !f() {
+	source ~/devops/aws/admin/func
+	}; f
+
+
+# returns list of account numbers and names
+accounts = !f() {
+      echo "613726763327	default		ucop-its";\
+      echo "309131107501	billing		ucop";\
+      echo "047041527684	eas		ucop-itssandbox-eas";\
+      echo "053905017478	poc		ucop-its-poc";\
+      echo "638822390486	ppers		ucop-ppers";\
+      echo "183454483292	template	ucop-templateaccount";\
+      echo "497286016891	was		ucop-was";\
+      echo "142736129605	ads		ucop-itssandbox-ads";\
+      echo "108619688584	dba		ucop-itssandbox-dba";\
+      echo "074589347111	ldc		the-account-with-no-name";\
+      }; f
+
+# returns list of account names 
+accountnames = !f() {
+	aws accounts |grep -v ^curr |awk '{print $2}'
+	}; f
+
+# returns list of account numbers 
+accountnums = !f() {
+	aws accounts |grep -v ^curr |awk '{print $1}'
+	}; f
+
+# returns list of non default account numbers
+remotes = !f() {
+	aws accounts |grep -v default |grep -v ^acct |awk '{print $1}';\
+	}; f
+
+
+accountname = iam list-account-aliases  --query AccountAliases --output text
+
+accountnum = lsu --query Account --output text
+
+accountalias = !f() {
+	aws accounts |grep `aws accountnum` |awk '{print $2}';\
+	}; f
+
+profile = configure list
+
+# List or set your region
+region = !f() {
+	[ $# -eq 1 ] && aws configure set region "$1" || aws configure get region;
+	}; f
+#list user 
+lsu = sts get-caller-identity
+
+#current working user 
+cwu = !f() {
+	aws sts get-caller-identity --query Arn --output text  |awk -F : '{print $6}'
+	}; f
+
+whereami = !f() {
+	echo "I am:"
+	echo
+	aws lsu
+	echo
+	echo  "in account:"
+	echo
+	aws accountname
+	echo
+	echo  "in region:"
+	echo
+	aws region
+      }; f
+
+# usage: aws mfasn <profile>
+# returns arn of mfa_serial you set in specified profile
+mfasn = !f() {
+	[ $# -eq 1 ] && profile=$1 || profile="default";
+	aws iam list-mfa-devices  --query MFADevices[0].SerialNumber --output text --profile $profile ;\
+      }; f
+
+# usage: aws mfacli <token-code> <profile>
+# generate temporary aws security token environment variables for your shell 
+mfacli = !f() {
+	[ $# -eq 2 ] && profile=$1 || profile="default";
+	mfadev=$(aws mfasn $profile);\
+	token=$(aws sts get-session-token --profile $profile --serial-number $mfadev --token-code $1  --output text);\
+	echo export AWS_ACCESS_KEY_ID_$profile=$(echo $token | awk '{print $2}');\
+	echo export AWS_SECURITY_TOKEN_EXPIRATION_$profile=$(echo $token | awk '{print $3}');\
+	echo export AWS_SECRET_ACCESS_KEY_$profile=$(echo $token | awk '{print $4}');\
+	echo export AWS_SECURITY_TOKEN_$profile=$(echo $token | awk '{print $5}');\
+	}; f
+
+#delete existing variables
+delcred = !f() {
+	echo 'export AWS_ACCESS_KEY_ID='';';\
+	echo 'export AWS_SECURITY_TOKEN='';';\
+	echo 'export AWS_SECRET_ACCESS_KEY='';';\
+	}; f
+
+#set aws variables to existing cached account variables
+setcred = !f() {
+	a=$(echo "AWS_ACCESS_KEY_ID_$1");\
+	echo 'export AWS_ACCESS_KEY_ID=$'$a';';\
+	a=$(echo "AWS_SECURITY_TOKEN_$1");\
+	echo 'export AWS_SECURITY_TOKEN=$'$a';';\
+	a=$(echo "AWS_SECRET_ACCESS_KEY_$1");\
+	echo 'export AWS_SECRET_ACCESS_KEY=$'$a';';\
+	}; f
+
+#get existing aws environment variables
+getcred = !f() {
+	echo $AWS_ACCESS_KEY_ID;\
+	echo $AWS_SECURITY_TOKEN;\
+	echo $AWS_SECRET_ACCESS_KEY;\
+	}; f
+
+#get token expiration environment variable
+datecred = !f() {
+	a=$(echo "AWS_SECURITY_TOKEN_EXPIRATION_$1");\
+	echo '$'$a;\
+	}; f
+
+#credentials to assume ronin role in an account
+# usage: `aws getronincred acctnumber`
+#aws sts assume-role --role-arn "arn:aws:iam::638822390486:role/roam" --role-session-name "ppers-ronin"
+getronincred = !f() {
+	account=$(aws accounts |grep  $1 | awk '{print $2}');\
+	name=$(echo "$account-roam");\
+	arole=$(aws sts assume-role --role-arn "arn:aws:iam::$1:role/roam" --role-session-name "$name" --output text);\
+	echo export AWS_ACCESS_KEY_ID_$account=$(echo $arole | awk '{print $5}');\
+	echo export AWS_SECURITY_TOKEN_EXPIRATION_$account=$(echo $arole | awk '{print $6}');\
+	echo export AWS_SECRET_ACCESS_KEY_$account=$(echo $arole | awk '{print $7}');\
+	echo export AWS_SECURITY_TOKEN_$account=$(echo $arole | awk '{print $8}');\
+	}; f
+
+#set aws env variables per remote account
+setronincreds = !f() {
+	for i in `aws remotes`; do aws getronincred $i; done
+	}; f
+
+ecr.ls = ecr describe-repositories --query repositories[*].repositoryUri --output text
+
+#get ecr uri
+ecr.uri = !f() {
+	if [ -z "$1" ]; then repo=util; else repo=$1;fi
+	aws ecr describe-repositories --repository-names $repo --query repositories[*].repositoryUri --output text
+	}; f
+
+#build docker image for ecr registry
+ecr.build = !f() {
+	dockerfile=`echo "Dockerfile-$1"`;
+	if [ ! -f "$dockerfile" ]; then echo No docker file $dockerfile  && exit 0; else app=$1; echo setting app to $app;fi
+	if [ -z "$2" ]; then echo No version && exit 0; else version=$2;echo setting version to $version;fi
+	reg=`aws ecr.uri $3`
+	tag=$reg:$app-$version
+	echo "reg is $reg"
+	echo "tag is $tag"
+	docker build -f "Dockerfile-$app" -t "$tag" .
+	}; f
+
+#build and push docker image
+ecr.bandp = !f() {
+	dockerfile=`echo "Dockerfile-$1"`;
+	if [ ! -f "$dockerfile" ]; then echo No docker file $dockerfile  && exit 0; else app=$1; echo setting app to $app;fi
+	if [ -z "$2" ]; then echo No version && exit 0; else version=$2;echo setting version to $version;fi
+	reg=`aws ecr.uri $3`
+	tag=$reg:$app-$version
+	echo "reg is $reg"
+	echo "tag is $tag"
+	docker build -f "Dockerfile-$app" -t "$tag" .
+	docker push $tag
+	}; f
+
+git.ls = codecommit list-repositories --query repositories[*].repositoryName --output text
+
+git.https.clone.url = !f() {
+	aws codecommit get-repository --repository-name  $1 --output text --query repositoryMetadata.cloneUrlHttp
+	}; f
+
+git.ssh.clone.url = !f() {
+	aws codecommit get-repository --repository-name  $1 --output text --query repositoryMetadata.cloneUrlSsh
+	}; f
+
+git.remotes = !f() {
+	for i in `aws git.ls`; do aws git.https.clone.url $i;done
+	}; f
+
+dns4hostedzone = route53 get-hosted-zone --query DelegationSet.NameServers --output text --id 
+
+
+templatesync = s3 cp . s3://templates.osmg.613726763327.ucop.edu/ --recursive --exclude ".git/*" --exclude ".DS_Store"
+
+# list instances in a ecs cluster
+ecs.ec2.ls = !f() {
+	if [ -z "$1" ]; then cluster="util"; else cluster=$1;fi
+	aws ecs list-container-instances --cluster $cluster --query containerInstanceArns[*] --output text
+      }; f
+
+# list instances in a ecs cluster
+ecs.ec2.id = !f() {
+	if [ -z "$1" ]; then cluster="util"; else cluster=$1;fi
+	instances=`aws ecs.ec2.ls $cluster`
+	aws ecs describe-container-instances  --cluster $cluster --container-instances $instances --query containerInstances[*].ec2InstanceId --output text |sed -e 's/\t/ /'
+	}; f
+# list public ip of ec2 instances
+ecs.ec2.dns.ls= !f() {
+	aws ecs.ec2.dns.inv $1  |grep -v '^\['  | tr '\n' ' '
+	echo
+	}; f
+
+#ansible inventory header 
+ansible.header = !f() {
+	if [ -z "$1" ]; then cluster="util"; else cluster=$1;fi
+	echo [`aws accountname`-ecs-$cluster]
+	}; f
+
+# list public ip of ec2 instances
+ecs.ec2.dns.inv = !f() {
+	aws ansible.header $1
+	aws ec2 describe-instances --instance-ids `aws ecs.ec2.id $1` --query Reservations[*].Instances[*].PublicDnsName --output text
+	}; f
+
+# list public ip of ec2 instances
+ecs.ec2.ip.ls= !f() {
+	aws ecs.ec2.ip.inv $1  |grep -v '^\['  | tr '\n' ' '
+	echo
+	}; f
+
+# list public ip of ec2 instances
+ecs.ec2.ip.inv = !f() {
+	aws ansible.header $1
+	aws ec2 describe-instances --instance-ids `aws ecs.ec2.id $1` --query Reservations[*].Instances[*].PublicIpAddress --output text
+	}; f
+
+# usage: aws ec2importsshpubkey $iam-user $ssh-key.pem $region
+# upload public ssh key
+#
+ec2importsshpubkey = !f() {
+	aws ec2 import-key-pair --key-name $1 --public-key-material "`openssl rsa -in $2 -pubout  |grep -v "PUBLIC KEY"`" --region $3;\
+	}; f
+
+# usage: aws sshpubkeyup $iam-user $ssh-key.pem
+# upload public ssh key
+#
+sshpubkeyup = !f() {
+	aws iam upload-ssh-public-key --user-name $1 --ssh-public-key-body "`ssh-keygen -y -f $2`";\
+	}; f
+
+certreq = !f() {
+	aws acm request-certificate --domain-name $1 --domain-validation-options DomainName=$1,ValidationDomain=ucop.edu  --region us-east-1
+	}; f
+
+vt = cloudformation validate-template --template-body 
+
+mkparm = !f() {
+	aws vt file://$1  --query Parameters[*] |sed -e 's/"NoEcho": false/"ParameterValue": ""/';\
+	}; f
+
+lsecsopt = !f() {
+	for i in `aws ec2 describe-images --owners amazon --filters "Name=name,Values='*amazon-ecs-optimized'" --query Images[*].CreationDate --output text`; do echo $i; done | sort -nk1 
+	}; f
+
+dsync = !f() {
+	aws s3 cp ~/devops/doc s3://cloudfront-origin-bucket.doc-int.devops.ucop.edu/ --recursive --exclude '.git/*';
+	}; f
+
+tsync = !f() {
+	aws s3 cp ~/ucop/cloudformation s3://templates.osmg.613726763327.ucop.edu/cloudformation/ --recursive --exclude '.git/*';
+	}; f
+
+
+# usage: `aws mkstack create <stackname> <template>` [extra params]
+#    `aws mkstack create test-cname make-cname.yaml` --parameters file://~/git-repos/devops/aws/cloudformation/params/admin/cname.json
+mkstack = !f() {
+      echo aws cloudformation $1-stack --stack-name $2 --template-body file://$3;\
+      }; f
+
+#create cloudforint origin identity
+mkcforigid = !f() {
+	 echo aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config CallerReference='"'`date +%Y%m%d:%H%M%S`'"',Comment='"'cloudfront origin access identity for $1 account'"'
+      }; f
+
+mkconf = !f() {
+	 echo "[default]"
+	 echo "region = us-west-2"
+	 echo "mfa_serial = arn:aws:iam::613726763327:mfa/{{iamusername}}"
+	 echo "aws_access_key_id = {{access_key_id}}"
+	 echo "aws_secret_access_key = {{secret_access_key}}"
+	}; f
+
+create-assume-role =
+  !f() {
+    aws iam create-role --role-name "${1}" \
+      --assume-role-policy-document \
+        "{\"Statement\":[{\
+            \"Action\":\"sts:AssumeRole\",\
+            \"Effect\":\"Allow\",\
+            \"Principal\":{\"Service\":\""${2}".amazonaws.com\"},\
+            \"Sid\":\"\"\
+          }],\
+          \"Version\":\"2012-10-17\"\
+        }";
+  }; f
+
+
+running-instances = ec2 describe-instances \
+    --filter Name=instance-state-name,Values=running \
+    --output table \
+    --query 'Reservations[].Instances[].{ID: InstanceId,Hostname: PublicDnsName,PrivateIP: PrivateIpAddresses,Name: Tags[?Key==`Name`].Value | [0],Type: InstanceType, Platform: Platform || `Linux`}'
+
+ebs-volumes= ec2 describe-volumes \
+    --query 'Volumes[].{VolumeId: VolumeId,State: State,Size: Size,Name: Tags[0].Value,AZ: AvailabilityZone}' \
+    --output table
+
+amazon-linux-amis = ec2 describe-images \
+    --filter \
+      Name=owner-alias,Values=amazon \
+      Name=name,Values="amzn-ami-hvm-*" \
+      Name=architecture,Values=x86_64 \
+      Name=virtualization-type,Values=hvm \
+      Name=root-device-type,Values=ebs \
+      Name=block-device-mapping.volume-type,Values=gp2 \
+    --query "reverse(sort_by(Images, &CreationDate))[*].[ImageId,Name,Description]" \
+    --output text
+
+list-sgs = ec2 describe-security-groups --query "SecurityGroups[].[GroupId, GroupName]" --output text
+
+sg-rules = !f() { aws ec2 describe-security-groups \
+    --query "SecurityGroups[].IpPermissions[].[FromPort,ToPort,IpProtocol,join(',',IpRanges[].CidrIp)]" \
+    --group-id "$1" --output text; }; f
