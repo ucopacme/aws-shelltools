@@ -1,7 +1,22 @@
-set_token() {
+#!/bin/bash
+
+aws-set-token() {
   read -p "please enter 6 digit token code for your MFA device: " code
   eval `./awstools.py --mfa-token $code`
 }
 
-#env|grep AWS
+aws-set-profile() {
+  if [ $# -gt 0 ]; then
+    profile_name=$1
+  else
+     profile_name='default'
+  fi
+  export AWS_PROFILE=$profile_name
+}
 
+aws-unset-token() {
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECURITY_TOKEN
+  unset AWS_SECURITY_TOKEN_EXPIRATION
+}
