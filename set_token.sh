@@ -1,5 +1,5 @@
 #!/bin/bash
 
-read -p "please enter 6 digit  otp for default aws account: " awsotp
-eval `awstools.py --otp $awsotp`
+read -p "please enter 6 digit token code for your MFA device: " code
+eval `awstools.py --mfa-token $code`
 
