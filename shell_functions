@@ -1,9 +1,5 @@
 #!/bin/bash
-
-aws-set-token() {
-  read -p "please enter 6 digit token code for your MFA device: " code
-  eval `./awstools.py --mfa-token $code`
-}
+#set -x
 
 aws-set-profile() {
   if [ $# -gt 0 ]; then
@@ -14,9 +10,27 @@ aws-set-profile() {
   export AWS_PROFILE=$profile_name
 }
 
+aws-set-token() {
+  read -p "please enter 6 digit token code for your MFA device: " code
+  if [ -n "$code" ]; then
+    eval `./awstools.py token --mfa-token $code`
+  else
+    eval `./awstools.py token`
+  fi
+}
+
 aws-unset-token() {
   unset AWS_SECRET_ACCESS_KEY
   unset AWS_ACCESS_KEY_ID
   unset AWS_SECURITY_TOKEN
   unset AWS_SECURITY_TOKEN_EXPIRATION
 }
+
+aws-assume-role() {
+# if no args ask for id and role
+# if one arg, use this as profile
+# if 2 arg, first is profile, second is role_name
+#   try to read profile from ordered list of config file paths
+  echo under construction
+}
+
