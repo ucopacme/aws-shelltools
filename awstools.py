@@ -19,6 +19,7 @@ Options:
 """
 # The TokenCode is the time-based one-time password (TOTP) that the MFA devices produces.
 
+import os
 import boto3
 from docopt import docopt
 
@@ -41,10 +42,9 @@ def get_sts_credentials(session, token_code):
     """
     Return temporary security credentials from AWS Simple Token Service.
     """
-    if token_code:
-        kwargs = dict(
-          SerialNumber=get_mfa_sn(session),
-          TokenCode=token_code)
+    mfa_sn = get_mfa_sn(session)
+    if token_code and mfa_sn:
+        kwargs = dict(SerialNumber=mfa_sn, TokenCode=token_code)
     else:
         kwargs = {}
 
@@ -68,8 +68,11 @@ def make_org_config():
 
 if __name__ == "__main__":
     args = docopt(__doc__, version='awstools 0.0.0')
-    session = boto3.Session(profile_name=args['--profile'])
-    #print args
+    if os.environ.get('AWS_PROFILE'):
+        aws_profile = os.environ.get('AWS_PROFILE')
+    else:
+        aws_profile = args['--profile']
+    session = boto3.Session(profile_name=aws_profile)
      
     if args['token']:
         creds = get_sts_credentials(session, args['--mfa-token'])
