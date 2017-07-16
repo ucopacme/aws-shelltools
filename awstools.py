@@ -79,6 +79,6 @@ if __name__ == "__main__":
         if creds:
             print "export AWS_ACCESS_KEY_ID=%s" % creds['AccessKeyId']
             print "export AWS_SECRET_ACCESS_KEY=%s" % creds['SecretAccessKey']
-            print "export AWS_SECURITY_TOKEN=%s" % creds['SessionToken']
-            print "export AWS_SECURITY_TOKEN_EXPIRATION='%s'" % creds['Expiration']
+            print "export AWS_SESSION_TOKEN=%s" % creds['SessionToken']
+            print "export AWS_SESSION_TOKEN_EXPIRATION='%s'" % creds['Expiration']
 
