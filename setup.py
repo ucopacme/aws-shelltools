@@ -16,11 +16,11 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='aws-ashtools',
+    name='aws-shelltools',
     version='0.0.1.dev1',
     description='Yet another set of script and shell functions for managing AWS profiles and cross account access.',
     long_description=long_description,
-    url='https://github.com/ashleygould/aws-ashtools',
+    url='https://github.com/ashleygould/aws-shelltools',
     author='Ashley Gould',
     author_email='agould@ucop.edu',
     license='MIT',
@@ -35,7 +35,16 @@ setup(
     ],
 
     keywords='aws session',
-    packages=find_packages(exclude=['archive', 'scratch', 'notes' ]),
+    packages=find_packages(exclude=['shell_scripts', 'scratch', 'notes' ]),
     install_requires=['boto3', 'docopt'],
-    scripts=['awstools.py']
+    package_data={
+        'aws-shelltools': ['shell_functions'],
+    },
+    entry_points={
+        'console_scripts': [
+            'aws-shelltools=awstoken:main',
+        ],
+    },
+
+    scripts=['awstoken.py']
 )

@@ -1,4 +1,4 @@
 *.swp
 *.swo
 *.pyc
-aws_ashtools.egg-info
+*.egg-info
