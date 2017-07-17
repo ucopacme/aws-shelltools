@@ -17,15 +17,13 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='aws-shelltools',
-    version='0.0.1.dev1',
+    version='0.0.2.dev1',
     description='Yet another set of script and shell functions for managing AWS profiles and cross account access.',
     long_description=long_description,
     url='https://github.com/ashleygould/aws-shelltools',
     author='Ashley Gould',
     author_email='agould@ucop.edu',
     license='MIT',
-
-    # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -33,7 +31,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
     ],
-
     keywords='aws session',
     packages=find_packages(exclude=['shell_scripts', 'scratch', 'notes' ]),
     install_requires=['boto3', 'docopt'],
@@ -42,7 +39,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'awstoken.py=awstoken:main',
+            'awstoken=awstoken:main',
+            'aws-shelltools-setup=shelltools_setup:main',
         ],
     },
 )

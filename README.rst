@@ -4,4 +4,4 @@ git clone https://github.com/ashleygould/aws-shelltools
 pip install --user -e aws-shelltools/
 
 pip uninstall aws-shelltools
-rm ~/.local/bin/{aws-shelltools,awstoken.py}
+rm ~/.local/bin/{awstoken.py}

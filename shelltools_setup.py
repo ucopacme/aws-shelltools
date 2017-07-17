@@ -1,0 +1,47 @@
+#!/usr/bin/python
+
+""" Edit user shell profile to source shell_functions at login.
+
+
+Usage:
+  aws-shelltools-setup (-h | --help)
+
+Options:
+  -h, --help                Show this help message and exit.
+
+Supported shells:
+  bash
+
+
+"""
+
+import os
+import pkg_resources
+
+
+def main():
+    homedir = os.environ.get('HOME')
+    shell = os.path.basename(
+            os.environ.get('SHELL'))
+    filename =  os.path.abspath(
+            pkg_resources.resource_filename(
+            __name__, 'shell_functions'))
+
+    snippet = """
+# source aws-shelltools functions
+[ -f %s ] && . %s
+""" % (filename, filename)
+
+    if shell == 'bash':
+        profile = '/'.join([homedir, '.bashrc'])
+    else:
+        profile = None
+
+    if profile and os.path.exists(profile):
+        with open(profile, 'a+') as f:
+            if snippet not in f.read():
+                f.write(snippet)
+                
+
+if __name__ == "__main__":
+    main()
