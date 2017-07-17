@@ -42,9 +42,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'aws-shelltools=awstoken:main',
+            'awstoken.py=awstoken:main',
         ],
     },
-
-    scripts=['awstoken.py']
 )

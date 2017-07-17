@@ -57,7 +57,7 @@ def _get_sts_credentials(session, token_code):
     return response.get('Credentials', None)
 
 
-if __name__ == "__main__":
+def main():
     args = docopt(__doc__)
 
     if os.environ.get('AWS_PROFILE'):
@@ -76,3 +76,6 @@ if __name__ == "__main__":
         print "export AWS_SESSION_TOKEN=%s" % creds['SessionToken']
         print "export AWS_SESSION_TOKEN_EXPIRATION='%s'" % creds['Expiration']
 
+
+if __name__ == "__main__":
+    main()
