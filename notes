@@ -1,0 +1,9 @@
+
+
+
+# https://github.com/boto/boto3/pull/69
+#>>> mgmt = boto3.session.Session(profile_name='Managment')
+#>>> iam_client = mgmt.client('iam')
+#>>> iam_client.list_users()
+#>>> client = session.client('sts')
+#>>> client.get_caller_identity
