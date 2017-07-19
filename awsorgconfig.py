@@ -6,6 +6,19 @@ Usage:
   awsorgconfig (-h | --help)
   awsorgconfig --version
   awsorgconfig [--mfa-token <token>] [--profile <profile>]
+  awsassumerole --role-name <profile> [--profile <profile>] [--config <path>]
+                [--config-dir <path>]
+
+Options:
+  -r, --role-name <profile>  The config profile title identifying the
+                            role to assume.  Required.
+  -p, --profile <profile>   AWS credentials profile to use.  Defaults to
+                            $AWS_PROFILE env var, then to 'default'.
+  -f, --config <path>       Path of the aws config file.  Defaults to
+                            $AWS_CONFIG_FILE, then to '~/.aws/config'.
+  -d, --config-dir <path>   Directory where to look for additional aws
+                            config files.  Defaults to
+                            $AWS_CONFIG_DIR, then to '~/.aws/config.d/'.
 
 Options:
   -h, --help                 Show this help message and exit.
@@ -40,19 +53,14 @@ def make_org_config():
     return None
 
 
-args = docopt(__doc__)
-print args
+def get_profile(args):
+    if args['--profile']:
+        return args['--profile']
+    if os.environ.get('AWS_PROFILE'):
+        return os.environ.get('AWS_PROFILE')
+    return DEFAULT_PROFILE
 
-config = configparser.SafeConfigParser()
-config.read(os.path.expanduser('~/.aws/config'))
-#print config.sections()
-#for s in config.sections():
-#    print s
-#    print config.items(s)
-#    print
-
-if not args['--profile'] == 'default':
-    try:
-        print config.get("profile %s" % args['--profile'],'role_arn')
-    except:
-        raise
+def main:
+    args = docopt(__doc__)
+    print args
+    aws_profile = get_profile(args)

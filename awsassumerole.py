@@ -4,14 +4,11 @@
 
 Usage:
   awsassumerole (-h | --help)
-  awsassumerole --role-name <profile> [--profile <profile>] [--config <path>]
-                [--config-dir <path>]
+  awsassumerole --profile <profile> [--config <path>] [--config-dir <path>]
 
 Options:
-  -r, --role-name <profile>  The config profile title identifying the
-                            role to assume.  Required.
-  -p, --profile <profile>   AWS credentials profile to use.  Defaults to
-                            $AWS_PROFILE env var, then to 'default'.
+  -p, --profile <profile>   Required. The config profile title identifying
+                            the role to assume.  
   -f, --config <path>       Path of the aws config file.  Defaults to
                             $AWS_CONFIG_FILE, then to '~/.aws/config'.
   -d, --config-dir <path>   Directory where to look for additional aws
@@ -22,13 +19,20 @@ Options:
 """
 
 
+import sys
 import os
+
 import boto3
 from docopt import docopt
 try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
+
+try:
+    from ConfigParser import NoOptionError, NoSectionError
+except ImportError:
+    from configparser import NoOptionError, NoSectionError
 
 
 DEFAULT_PROFILE = 'default'
@@ -42,35 +46,11 @@ def get_session(aws_profile):
     obtain client credentials from shell environment.  This should
     capture MFA credential if present in user's shell env.
     """
-    session_args = dict(
+    return boto3.Session(
             profile_name=aws_profile,
             aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', ''),
             aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
             aws_session_token=os.environ.get('AWS_SESSION_TOKEN', ''))
-    return boto3.Session(**session_args)
-
-
-def assume_role(session, role_arn, role_session_name):
-    """
-    Get temporary sts assume_role credentials for account.
-    """
-    sts_client = session.client('sts')
-    credentials = sts_client.assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=role_session_name
-            )['Credentials']
-    return dict(
-            aws_access_key_id = credentials['AccessKeyId'],
-            aws_secret_access_key = credentials['SecretAccessKey'],
-            aws_session_token = credentials['SessionToken'])
-
-
-def get_profile(args):
-    if args['--profile']:
-        return args['--profile']
-    if os.environ.get('AWS_PROFILE'):
-        return os.environ.get('AWS_PROFILE')
-    return DEFAULT_PROFILE
 
 
 def load_aws_config(args):
@@ -102,37 +82,48 @@ def load_aws_config(args):
     return config
 
 
+def parse_assume_role_profile(args, config):
+    section = "profile %s" % args['--profile']
+    try:
+        role_arn = config.get(section, 'role_arn')
+    except (NoOptionError, NoSectionError) as e:
+        print e
+        sys.exit(1)
+    try:
+        source_profile = config.get(section, 'source_profile')
+    except (NoOptionError, NoSectionError) as e:
+        print e
+        sys.exit(1)
+    try:
+        role_session_name = config.get(section, 'role_session_name')
+    except (NoOptionError, NoSectionError) as e:
+        print e
+        sys.exit(1)
+    return (role_arn, source_profile, role_session_name)
+
+
+def assume_role_from_profile(args):
+    config = load_aws_config(args)
+    (role_arn, source_profile, role_session_name) = parse_assume_role_profile(
+            args, config)
+    session = get_session(source_profile)
+    sts_client = session.client('sts')
+    return sts_client.assume_role(
+            RoleArn=role_arn,
+            RoleSessionName=role_session_name)
+
+
 def main():
     args = docopt(__doc__)
-    aws_profile = get_profile(args)
-    session = get_session(aws_profile)
-    config = load_aws_config(args)
-    #print config.sections()
+    res = assume_role_from_profile(args)
+    print "export AWS_ACCESS_KEY_ID=%s" % res['Credentials']['AccessKeyId']
+    print "export AWS_SECRET_ACCESS_KEY=%s" % res['Credentials']['SecretAccessKey']
+    print "export AWS_SESSION_TOKEN=%s" % res['Credentials']['SessionToken']
+    print "export AWS_SESSION_TOKEN_EXPIRATION='%s'" % res['Credentials']['Expiration']
 
-    section = "profile %s" % args['--role-name']
-    if config.has_section(section):
-        role_arn = config.get(section, 'role_arn')
-        role_session_name = config.get(section, 'role_session_name')
-    token = assume_role(session, role_arn, role_session_name)
-    print token
+    print "export AWS_ASSUMED_ROLE_ARN=%s" % res['AssumedRoleUser']['Arn']
+    print "export AWS_ASSUMED_ROLE_PROFILE=%s" % args['--profile']
+
 
 if __name__ == "__main__":
     main()
-
-
-# ashely@horus:~/aws/aws-shelltools> ./awsassumerole.py -r goeruio
-# Traceback (most recent call last):
-#   File "./awsassumerole.py", line 120, in <module>
-#     main()
-#   File "./awsassumerole.py", line 116, in main
-#     token = assume_role(session, role_arn, role_session_name)
-# UnboundLocalError: local variable 'role_arn' referenced before assignment
-
-
-
-
-
-
-
-#org_client = session.client('organizations', **credentials)
-
