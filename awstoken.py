@@ -7,12 +7,12 @@ Simple Token Service and display them as shell 'export' statements.  The
 user will then apply these to her current shell environment, typically
 using 'eval' as in:
 
-  eval `aws awstoken.py.py --mfa-token 123456`
+  eval `aws awstoken --mfa-token 123456`
 
 
 Usage:
-  awstoken.py.py (-h | --help)
-  awstoken.py.py [--mfa-token <token>] [--profile <profile>]
+  awstoken (-h | --help)
+  awstoken [--mfa-token <token>] [--profile <profile>]
 
 Options:
   -h, --help                Show this help message and exit.
