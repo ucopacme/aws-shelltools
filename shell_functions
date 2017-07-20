@@ -1,6 +1,62 @@
 #!/bin/bash
 #set -x
 
+
+aws-whoami() {
+  aws sts get-caller-identity
+}
+
+aws-env() {
+  env | grep ^AWS | sort
+}
+
+aws-unset-mfa-token() {
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
+  unset AWS_SESSION_TOKEN_EXPIRATION
+  unset AWS_MFA_ACCESS_KEY_ID
+  unset AWS_MFA_SECRET_ACCESS_KEY
+  unset AWS_MFA_SESSION_TOKEN
+  unset AWS_MFA_SESSION_TOKEN_EXPIRATION
+}
+
+aws-show-assumed-role() {
+  echo "AWS_ASSUMED_ROLE_PROFILE:     $AWS_ASSUMED_ROLE_PROFILE"
+  echo "AWS_ASSUMED_ROLE_ARN:         $AWS_ASSUMED_ROLE_ARN"
+  echo "AWS_SESSION_TOKEN_EXPIRATION: $AWS_SESSION_TOKEN_EXPIRATION"
+}
+
+aws-drop-assumed-role() {
+  unset AWS_ASSUMED_ROLE_ARN
+  unset AWS_ASSUMED_ROLE_PROFILE
+
+  if [ -n "$AWS_MFA_ACCESS_KEY_ID" ]; then
+    export AWS_ACCESS_KEY_ID=$AWS_MFA_ACCESS_KEY_ID
+  else
+    unset AWS_ACCESS_KEY_ID
+  fi
+
+  if [ -n "$AWS_MFA_SECRET_ACCESS_KEY" ]; then
+    export AWS_SECRET_ACCESS_KEY=$AWS_MFA_SECRET_ACCESS_KEY
+  else
+    unset AWS_SECRET_ACCESS_KEY
+  fi
+
+  if [ -n "$AWS_MFA_SESSION_TOKEN" ]; then
+    export AWS_SESSION_TOKEN=$AWS_MFA_SESSION_TOKEN
+  else
+    unset AWS_SESSION_TOKEN
+  fi
+
+  if [ -n "$AWS_MFA_SESSION_TOKEN_EXPIRATION" ]; then
+    export AWS_SESSION_TOKEN_EXPIRATION=$AWS_MFA_SESSION_TOKEN_EXPIRATION
+  else
+    unset AWS_SESSION_TOKEN_EXPIRATION
+  fi
+}
+
+
 aws-profile() {
   usage() {
     cat << EOF
@@ -31,7 +87,7 @@ EOF
 
 
 
-aws-set-token() {
+aws-set-mfa-token() {
   usage() {
     cat << EOF
 
@@ -62,7 +118,6 @@ EOF
     if [ -n "$profile" ]; then
        params="${params} --profile $profile"
     fi
-    echo $params
     eval $(awstoken $params)
   }
   
@@ -81,24 +136,31 @@ EOF
 }
 
 
-
-
-# same as running 'aws-set-token -u'
-aws-unset-token() {
-  unset AWS_SECRET_ACCESS_KEY
-  unset AWS_ACCESS_KEY_ID
-  unset AWS_SESSION_TOKEN
-  unset AWS_SESSION_TOKEN_EXPIRATION
-}
-
-
-
-
 aws-assume-role() {
-# if no args ask for id and role
-# if one arg, use this as profile
-# if 2 arg, first is profile, second is role_name
-#   try to read profile from ordered list of config file paths
-  echo under construction
+  aws-drop-assumed-role
+  if [ $# -eq 0 ]; then
+    aws-display-assumed-role
+  elif [ $# -eq 1 ]; then
+    case $1 in
+      '-h' ) usage;;
+      '-u' ) aws-drop-assumed-role;;
+      * ) params="--profile $1";;
+    esac
+  elif [ $# -eq 2 ]; then
+    params="--profile $1 --config $2"
+  elif [ $# -eq 3 ]; then
+    params="--profile $1 --config $2 --config-dir $3"
+  else
+    usage
+  fi
+
+  result=$(awsassumerole $params)
+  #echo $result
+  if [ "$?" -ne '0' ]; then
+    echo $result
+  else
+    eval $result
+  fi
+
 }
 

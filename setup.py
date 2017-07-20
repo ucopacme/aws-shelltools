@@ -40,6 +40,7 @@ setup(
     entry_points={
         'console_scripts': [
             'awstoken=awstoken:main',
+            'awsassumerole=awsassumerole:main',
             'aws-shelltools-setup=shelltools_setup:main',
         ],
     },

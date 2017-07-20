@@ -28,7 +28,9 @@ def main():
             __name__, 'shell_functions'))
 
     snippet = """
-# source aws-shelltools functions
+# aws-shelltools functions
+export AWS_CONFIG_FILE='~/.aws/config'
+export AWS_CONFIG_DIR='~/.aws/config.d'
 [ -f %s ] && . %s
 """ % (filename, filename)
 

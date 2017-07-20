@@ -23,6 +23,8 @@ import sys
 import os
 
 import boto3
+import botocore.exceptions
+from botocore.exceptions import ClientError
 from docopt import docopt
 try:
     import ConfigParser as configparser
@@ -87,17 +89,17 @@ def parse_assume_role_profile(args, config):
     try:
         role_arn = config.get(section, 'role_arn')
     except (NoOptionError, NoSectionError) as e:
-        print e
+        print "AWS config Error: %s" % e
         sys.exit(1)
     try:
         source_profile = config.get(section, 'source_profile')
     except (NoOptionError, NoSectionError) as e:
-        print e
+        print "AWS config Error: %s" % e
         sys.exit(1)
     try:
         role_session_name = config.get(section, 'role_session_name')
     except (NoOptionError, NoSectionError) as e:
-        print e
+        print "AWS config Error: %s" % e
         sys.exit(1)
     return (role_arn, source_profile, role_session_name)
 
@@ -108,9 +110,17 @@ def assume_role_from_profile(args):
             args, config)
     session = get_session(source_profile)
     sts_client = session.client('sts')
-    return sts_client.assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=role_session_name)
+    try:
+        response = sts_client.assume_role(
+                RoleArn=role_arn,
+                RoleSessionName=role_session_name)
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'AccessDenied':
+            print e.response['Error']['Message']
+            sys.exit(1)
+        else:
+            raise e
+    return response
 
 
 def main():
