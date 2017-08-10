@@ -33,7 +33,7 @@ setup(
     ],
     keywords='aws session',
     packages=find_packages(exclude=['shell_scripts', 'scratch', 'notes' ]),
-    install_requires=['boto3', 'docopt'],
+    install_requires=['awscli', 'boto3', 'docopt'],
     package_data={
         'aws-shelltools': ['shell_functions'],
     },
@@ -41,7 +41,7 @@ setup(
         'console_scripts': [
             'awstoken=aws_shelltools.awstoken:main',
             'awsassumerole=aws_shelltools.awsassumerole:main',
-            'awsconfig=aws_shelltools.awsconfig:main',
+            'aws-make-config=aws_shelltools.awsconfig:main',
             'aws-shelltools-setup=aws_shelltools.shelltools_setup:main',
         ],
     },

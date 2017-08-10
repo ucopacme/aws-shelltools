@@ -3,8 +3,8 @@
 """Generate aws client config file by listing group assume role policies.
 
 Usage:
-  awsconfig (-h | --help)
-  awsconfig [--profile <profile>] [--config <path>] [--config-dir <path>]
+  aws-make-config (-h | --help)
+  aws-make-config [--profile <profile>] [--config <path>] [--config-dir <path>]
 
 Options:
   -p, --profile <profile>   AWS credentials profile to use.  Defaults to
