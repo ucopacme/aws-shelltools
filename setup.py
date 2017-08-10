@@ -41,6 +41,7 @@ setup(
         'console_scripts': [
             'awstoken=aws_shelltools.awstoken:main',
             'awsassumerole=aws_shelltools.awsassumerole:main',
+            'awsconfig=aws_shelltools.awsconfig:main',
             'aws-shelltools-setup=aws_shelltools.shelltools_setup:main',
         ],
     },
