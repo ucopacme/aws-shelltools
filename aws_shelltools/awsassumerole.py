@@ -5,6 +5,7 @@
 Usage:
   awsassumerole (-h | --help)
   awsassumerole --profile <profile> [--config <path>] [--config-dir <path>]
+  awsassumerole --list-profiles
 
 Options:
   -p, --profile <profile>   Required. The config profile title identifying
@@ -14,6 +15,8 @@ Options:
   -d, --config-dir <path>   Directory where to look for additional aws
                             config files.  Defaults to
                             $AWS_CONFIG_DIR, then to '~/.aws/config.d/'.
+  -l, --list-profiles       Display a list of configured aws assume
+                            role profiles.
   -h, --help                Show this help message and exit.
 
 """
@@ -30,11 +33,6 @@ try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
-
-try:
-    from ConfigParser import NoOptionError, NoSectionError
-except ImportError:
-    from configparser import NoOptionError, NoSectionError
 
 
 DEFAULT_PROFILE = 'default'
@@ -87,21 +85,26 @@ def load_aws_config(args):
     return config
 
 
+def list_config_profiles(config):
+    profiles = config.sections()
+    print "\n".join(sorted(profiles))
+
+
 def parse_assume_role_profile(args, config):
     section = "profile %s" % args['--profile']
     try:
         role_arn = config.get(section, 'role_arn')
-    except (NoOptionError, NoSectionError) as e:
+    except (configparser.NoOptionError, configparser.NoSectionError) as e:
         print "AWS config Error: %s" % e
         sys.exit(1)
     try:
         source_profile = config.get(section, 'source_profile')
-    except (NoOptionError, NoSectionError) as e:
+    except (configparser.NoOptionError, configparser.NoSectionError) as e:
         print "AWS config Error: %s" % e
         sys.exit(1)
     try:
         role_session_name = config.get(section, 'role_session_name')
-    except (NoOptionError, NoSectionError) as e:
+    except (configparser.NoOptionError, configparser.NoSectionError) as e:
         print "AWS config Error: %s" % e
         sys.exit(1)
     return (role_arn, source_profile, role_session_name)
@@ -128,14 +131,18 @@ def assume_role_from_profile(args):
 
 def main():
     args = docopt(__doc__)
-    res = assume_role_from_profile(args)
-    print "export AWS_ACCESS_KEY_ID=%s" % res['Credentials']['AccessKeyId']
-    print "export AWS_SECRET_ACCESS_KEY=%s" % res['Credentials']['SecretAccessKey']
-    print "export AWS_SESSION_TOKEN=%s" % res['Credentials']['SessionToken']
-    print "export AWS_SESSION_TOKEN_EXPIRATION='%s'" % res['Credentials']['Expiration']
+    if args['--list-profiles']:
+        config = load_aws_config(args)
+        list_config_profiles(config)
+    else:
+        res = assume_role_from_profile(args)
+        print "export AWS_ACCESS_KEY_ID=%s" % res['Credentials']['AccessKeyId']
+        print "export AWS_SECRET_ACCESS_KEY=%s" % res['Credentials']['SecretAccessKey']
+        print "export AWS_SESSION_TOKEN=%s" % res['Credentials']['SessionToken']
+        print "export AWS_SESSION_TOKEN_EXPIRATION='%s'" % res['Credentials']['Expiration']
 
-    print "export AWS_ASSUMED_ROLE_ARN=%s" % res['AssumedRoleUser']['Arn']
-    print "export AWS_ASSUMED_ROLE_PROFILE=%s" % args['--profile']
+        print "export AWS_ASSUMED_ROLE_ARN=%s" % res['AssumedRoleUser']['Arn']
+        print "export AWS_ASSUMED_ROLE_PROFILE=%s" % args['--profile']
 
 
 if __name__ == "__main__":
