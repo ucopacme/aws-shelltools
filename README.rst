@@ -1,23 +1,30 @@
-Yet another set of scripts and shell functions for managing AWS profiles and cross account access.
+--------------
+aws-shelltools
+
+Yet another set of scripts and shell functions for managing AWS profiles
+and cross account access.
 
 
-Install (as local user):
-git clone https://github.com/ashleygould/aws-shelltools
-pip install --user -e aws-shelltools/
+**Install** (as local user)::
+
+  git clone https://github.com/ashleygould/aws-shelltools
+  pip install --user -e aws-shelltools/
 
 
-Uninstall:
-pip uninstall aws-shelltools
-rm ~/.local/bin/{awstoken,awsassumerole,awsconfig,aws-shelltools-setup}
-rm ./lib/python2.7/site-packages/aws-shelltools.egg-link
+**Uninstall**::
+
+  pip uninstall aws-shelltools
+  rm ~/.local/bin/{awstoken,awsassumerole,awsconfig,aws-shelltools-setup}
 
 
-Configure:
-aws-shelltools-setup
-. ~/.bashrc
+**Configure**::
+
+  aws-shelltools-setup
+  . ~/.bashrc
 
 
 The AWS shelltools:
+-------------------
 
 aws-profile
   Set or display value of shell environment var AWS_PROFILE.
@@ -54,20 +61,21 @@ aws-unset-mfa-token
   
 
 
-Usage:
-Run each command with -h option for full usage info.
+**Usage**::
 
-aws-profile <profile>
-aws-make-config
-aws-list-roles
-aws-set-mfa-token
-aws-assume-role <profile>
+  # Run each command with -h option for full usage info.
 
-aws-display-assumed-role
-aws-whoami
-aws-env
+  aws-profile <profile>
+  aws-make-config
+  aws-list-roles
+  aws-set-mfa-token
+  aws-assume-role <profile>
+  
+  aws-display-assumed-role
+  aws-whoami
+  aws-env
 
-aws-drop-assumed-role
-aws-unset-mfa-token
+  aws-drop-assumed-role
+  aws-unset-mfa-token
 
 

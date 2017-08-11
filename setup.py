@@ -17,7 +17,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='aws-shelltools',
-    version='0.0.2.dev1',
+    version='0.0.3.dev1',
     description='Yet another set of script and shell functions for managing AWS profiles and cross account access.',
     long_description=long_description,
     url='https://github.com/ashleygould/aws-shelltools',
