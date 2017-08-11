@@ -6,7 +6,7 @@ aws-whoami() {
   if [ $# -gt 0 ]; then
     case $1 in
       '-h' ) echo "Print output of 'aws sts get-caller-identity'";;
-      * ) :;;
+      * ) return;;
     esac
   else
     aws sts get-caller-identity
@@ -18,7 +18,7 @@ aws-env() {
   if [ $# -gt 0 ]; then
     case $1 in
       '-h' ) echo "Print current values of all AWS environment vars";;
-      * ) :;;
+      * ) return;;
     esac
   else
     env | grep ^AWS | sort
@@ -30,7 +30,7 @@ aws-unset-mfa-token() {
   if [ $# -gt 0 ]; then
     case $1 in
       '-h' ) echo "Unset all AWS session token environemt vars";;
-      * ) :;;
+      * ) return;;
     esac
   else
     unset AWS_ACCESS_KEY_ID
@@ -48,7 +48,7 @@ aws-display-assumed-role() {
   if [ $# -gt 0 ]; then
     case $1 in
       '-h' ) echo "Print current values of AWS assumed role environment vars";;
-      * ) :;;
+      * ) return;;
     esac
   else
     echo "AWS_ASSUMED_ROLE_PROFILE:     $AWS_ASSUMED_ROLE_PROFILE"
@@ -57,11 +57,12 @@ aws-display-assumed-role() {
   fi
 }
 
+
 aws-drop-assumed-role() {
   if [ $# -gt 0 ]; then
     case $1 in
       '-h' ) echo "Reset AWS session environment vars to values prior to assuming role";;
-      * ) :;;
+      * ) return;;
     esac
   else
     unset AWS_ASSUMED_ROLE_ARN
@@ -93,7 +94,6 @@ aws-drop-assumed-role() {
 aws-profile() {
   usage() {
     cat << EOF
-
 Set or display value of shell environment var AWS_PROFILE.
 If no args, echo the current value of AWS_PROFILE.
 
@@ -118,12 +118,9 @@ EOF
 }
 
 
-
-
 aws-set-mfa-token() {
   usage() {
     cat << EOF
-
 Request temporary session credentials from AWS STS.  Export these credentials
 to environment vars in the current shell.  Affected vars:
 
@@ -169,13 +166,24 @@ EOF
 }
 
 
+aws-list-roles() {
+  if [ $# -gt 0 ]; then
+    case $1 in
+      '-h' ) echo "Print list of available AWS assume role profiles." ;;
+      * ) return ;;
+    esac
+  else
+    awsassumerole --list-profiles
+  fi
+}
+
+
 aws-assume-role() {
   usage() {
     cat << EOF
-
 Run 'aws sts assume-role' operation to obtain temporary assumed role
-credentials for the specified profile.  Export these credentials to environment
-vars in the current shell.
+credentials for the specified profile.  Export these credentials to
+environment vars in the current shell.
 
 Usage: aws-assume-role [-h]
 Usage: aws-assume-role [--config-file <path>] [--config-dir <path>] <profile_name>
@@ -208,11 +216,11 @@ EOF
   esac
 
   if [ -n "$params" ]; then
+    aws-drop-assumed-role
     result=$(awsassumerole $params)
     if [ "$?" -ne '0' ]; then
       echo $result
     else
-      aws-drop-assumed-role
       eval $result
     fi
   fi

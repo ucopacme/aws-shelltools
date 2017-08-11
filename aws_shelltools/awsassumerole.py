@@ -86,12 +86,28 @@ def load_aws_config(args):
 
 
 def list_config_profiles(config):
-    profiles = config.sections()
-    print "\n".join(sorted(profiles))
+    if os.environ.get('AWS_PROFILE'):
+        aws_profile = os.environ.get('AWS_PROFILE')
+    else:
+        aws_profile = DEFAULT_PROFILE
+    return [p for p in sorted(config.sections())
+            if (config.has_option(p, 'source_profile')
+            and config.get(p, 'source_profile') == aws_profile)]
 
 
 def parse_assume_role_profile(args, config):
-    section = "profile %s" % args['--profile']
+    profiles = list_config_profiles(config)
+    candidates = [p for p in profiles if args['--profile'] in p]        
+    if len(candidates) == 1:
+        section = candidates[0]
+    elif "profile %s" % args['--profile'] in candidates:
+        section = "profile %s" % args['--profile']
+    else:
+        print ("\nYour specified profile '%s' matches multiple configured "
+                "profiles.\nSelect one the list below and try again:\n\n%s" %
+                (args['--profile'],
+                "\n".join([p.split()[1] for p in candidates])))
+        sys.exit(1)
     try:
         role_arn = config.get(section, 'role_arn')
     except (configparser.NoOptionError, configparser.NoSectionError) as e:
@@ -133,7 +149,8 @@ def main():
     args = docopt(__doc__)
     if args['--list-profiles']:
         config = load_aws_config(args)
-        list_config_profiles(config)
+        profiles = list_config_profiles(config)
+        print "\n".join(profiles)
     else:
         res = assume_role_from_profile(args)
         print "export AWS_ACCESS_KEY_ID=%s" % res['Credentials']['AccessKeyId']

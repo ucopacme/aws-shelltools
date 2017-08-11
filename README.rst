@@ -1,10 +1,15 @@
-Yet another set of script and shell functions for managing AWS profiles and cross account access.
+Yet another set of scripts and shell functions for managing AWS profiles and cross account access.
 
 
 Install (as local user):
-
 git clone https://github.com/ashleygould/aws-shelltools
 pip install --user -e aws-shelltools/
+
+
+Uninstall:
+pip uninstall aws-shelltools
+rm ~/.local/bin/{awstoken,awsassumerole,awsconfig,aws-shelltools-setup}
+rm ./lib/python2.7/site-packages/aws-shelltools.egg-link
 
 
 Configure:
@@ -12,10 +17,49 @@ aws-shelltools-setup
 . ~/.bashrc
 
 
+The AWS shelltools:
+
+aws-profile
+  Set or display value of shell environment var AWS_PROFILE.
+
+aws-make-config
+  Generate aws client config file by listing group assume role policies.
+  
+aws-list-roles
+  Print list of available AWS assume role profiles.
+  
+aws-set-mfa-token
+  Request temporary session credentials from AWS STS.  Export these credentials
+  to environment vars in the current shell.
+
+aws-assume-role
+  Run 'aws sts assume-role' operation to obtain temporary assumed role
+  credentials for the specified profile.  Export these credentials to
+  environment vars in the current shell.
+
+aws-display-assumed-role
+  Print current values of AWS assumed role environment vars
+  
+aws-whoami
+  Print output of 'aws sts get-caller-identity'
+  
+aws-env
+  Print current values of all AWS environment vars
+  
+aws-drop-assumed-role
+  Reset AWS session environment vars to values prior to assuming role
+  
+aws-unset-mfa-token
+  Unset all AWS session token environemt vars
+  
+
+
 Usage:
+Run each command with -h option for full usage info.
+
 aws-profile <profile>
-aws-make-config (awsconfig)
-aws-list-profiles
+aws-make-config
+aws-list-roles
 aws-set-mfa-token
 aws-assume-role <profile>
 
@@ -27,9 +71,3 @@ aws-drop-assumed-role
 aws-unset-mfa-token
 
 
-
-
-Uninstall:
-pip uninstall aws-shelltools
-rm ~/.local/bin/{awstoken,awsassumerole,awsconfig,aws-shelltools-setup}
-rm ./lib/python2.7/site-packages/aws-shelltools.egg-link
