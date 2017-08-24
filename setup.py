@@ -17,22 +17,22 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='aws-shelltools',
-    version='0.0.3.dev1',
-    description='Yet another set of script and shell functions for managing AWS profiles and cross account access.',
+    version='0.0.4.rc1',
+    description='Yet another set of scripts and shell functions for managing AWS profiles and cross account access.',
     long_description=long_description,
     url='https://github.com/ashleygould/aws-shelltools',
     author='Ashley Gould',
     author_email='agould@ucop.edu',
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
     ],
-    keywords='aws session',
+    keywords='aws awscli session',
     packages=find_packages(exclude=['scratch', 'notes' ]),
     install_requires=['awscli', 'boto3', 'docopt'],
     package_data={

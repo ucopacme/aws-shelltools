@@ -1,16 +1,24 @@
---------------
+==============
 aws-shelltools
+==============
+
 
 Yet another set of scripts and shell functions for managing AWS profiles
 and cross account access.
 
 
-**Install** (as local user)::
+**Install**
+
+Site installation::
+
+  sudo pip install git+https://www.github.com/ashleygould/aws-shelltools.git 
+
+Local user installation::
 
   git clone https://github.com/ashleygould/aws-shelltools
   pip install --user -e aws-shelltools/
 
-On RHEL6 run the following as well::
+On RHEL6 you may need to update setuptools as well:
 
   sudo pip install -U setuptools
 
@@ -18,6 +26,8 @@ On RHEL6 run the following as well::
 **Uninstall**::
 
   pip uninstall aws-shelltools
+
+  # if installed as local user also run:
   rm ~/.local/bin/{awstoken,awsassumerole,awsconfig,aws-shelltools-setup}
 
 
@@ -27,8 +37,8 @@ On RHEL6 run the following as well::
   . ~/.bashrc
 
 
-The AWS shelltools:
--------------------
+The shelltools:
+---------------
 
 aws-profile
   Set or display value of shell environment var AWS_PROFILE.
@@ -83,3 +93,8 @@ aws-unset-mfa-token
   aws-unset-mfa-token
 
 
+
+:Author: 
+    Ashley Gould (agould@ucop.edu)
+
+:Version: 0.0.4
