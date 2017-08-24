@@ -10,6 +10,10 @@ and cross account access.
   git clone https://github.com/ashleygould/aws-shelltools
   pip install --user -e aws-shelltools/
 
+On RHEL6 run the following as well::
+
+  sudo pip install -U setuptools
+
 
 **Uninstall**::
 
