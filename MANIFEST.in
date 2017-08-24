@@ -1,0 +1,4 @@
+include README.rst
+include LICENSE.txt
+include aws_shelltools/shell_functions/*
+#recursive-include aws_shelltools/shell_functions/*

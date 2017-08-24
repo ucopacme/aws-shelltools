@@ -36,7 +36,7 @@ setup(
     packages=find_packages(exclude=['scratch', 'notes' ]),
     install_requires=['awscli', 'boto3', 'docopt'],
     package_data={
-        'aws-shelltools': ['shell_functions'],
+        'aws_shelltools': ['shell_functions/*'],
     },
     entry_points={
         'console_scripts': [
