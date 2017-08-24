@@ -33,7 +33,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
     keywords='aws session',
-    packages=find_packages(exclude=['shell_scripts', 'scratch', 'notes' ]),
+    packages=find_packages(exclude=['scratch', 'notes' ]),
     install_requires=['awscli', 'boto3', 'docopt'],
     package_data={
         'aws-shelltools': ['shell_functions'],

@@ -23,7 +23,7 @@ def main():
     homedir = os.environ.get('HOME')
     shell = os.path.basename(os.environ.get('SHELL'))
     filename =  os.path.abspath(pkg_resources.resource_filename(__name__,
-		'../shell_functions'))
+            'shell_functions'))
 
     snippet = """
 # aws-shelltools functions
