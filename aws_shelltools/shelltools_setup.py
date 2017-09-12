@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """ Edit user shell profile to source shell_functions at login.
 
 
 Usage:
-  aws-shelltools-setup (-h | --help)
+  aws-shelltools-setup [-h | --help]
 
 Options:
   -h, --help                Show this help message and exit.
@@ -17,9 +17,11 @@ Supported shells:
 
 import os
 import pkg_resources
+from docopt import docopt
 
 
 def main():
+    args = docopt(__doc__)
     homedir = os.environ.get('HOME')
     shell = os.path.basename(os.environ.get('SHELL'))
     filename =  os.path.abspath(pkg_resources.resource_filename(__name__,

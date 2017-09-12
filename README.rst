@@ -97,4 +97,4 @@ aws-unset-mfa-token
 :Author: 
     Ashley Gould (agould@ucop.edu)
 
-:Version: 0.0.4
+:Version: 0.0.5-rc1

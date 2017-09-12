@@ -17,7 +17,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='aws-shelltools',
-    version='0.0.4.rc1',
+    version='0.0.5.rc1',
     description='Yet another set of scripts and shell functions for managing AWS profiles and cross account access.',
     long_description=long_description,
     url='https://github.com/ashleygould/aws-shelltools',
@@ -31,6 +31,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
     ],
     keywords='aws awscli session',
     packages=find_packages(exclude=['scratch', 'notes' ]),
