@@ -98,30 +98,34 @@ def list_config_profiles(config):
 def parse_assume_role_profile(args, config):
     profiles = list_config_profiles(config)
     candidates = [p for p in profiles if args['--profile'] in p]        
-    if len(candidates) == 1:
+    if not candidates:
+        print("\nProfile '%s' not found.\nSelect a profile from the list below and "
+                "try again:\n\n%s" % (args['--profile'], "\n".join(profiles)))
+        sys.exit(1)
+    elif len(candidates) == 1:
         section = candidates[0]
     elif "profile %s" % args['--profile'] in candidates:
         section = "profile %s" % args['--profile']
     else:
-        print ("\nYour specified profile '%s' matches multiple configured "
-                "profiles.\nSelect one the list below and try again:\n\n%s" %
+        print("\nYour specified profile '%s' matches multiple configured "
+        	"profiles.\nSelect one the list below and try again:\n\n%s" %
                 (args['--profile'],
                 "\n".join([p.split()[1] for p in candidates])))
         sys.exit(1)
     try:
         role_arn = config.get(section, 'role_arn')
     except (configparser.NoOptionError, configparser.NoSectionError) as e:
-        print "AWS config Error: %s" % e
+        print("AWS config Error: %s" % e)
         sys.exit(1)
     try:
         source_profile = config.get(section, 'source_profile')
     except (configparser.NoOptionError, configparser.NoSectionError) as e:
-        print "AWS config Error: %s" % e
+        print("AWS config Error: %s" % e)
         sys.exit(1)
     try:
         role_session_name = config.get(section, 'role_session_name')
     except (configparser.NoOptionError, configparser.NoSectionError) as e:
-        print "AWS config Error: %s" % e
+        print("AWS config Error: %s" % e)
         sys.exit(1)
     return (role_arn, source_profile, role_session_name)
 
@@ -138,7 +142,7 @@ def assume_role_from_profile(args):
                 RoleSessionName=role_session_name)
     except ClientError as e:
         if e.response['Error']['Code'] == 'AccessDenied':
-            print e.response['Error']['Message']
+            print(e.response['Error']['Message'])
             sys.exit(1)
         else:
             raise e
@@ -150,16 +154,16 @@ def main():
     if args['--list-profiles']:
         config = load_aws_config(args)
         profiles = list_config_profiles(config)
-        print "\n".join(profiles)
+        print("\n".join(profiles))
     else:
         res = assume_role_from_profile(args)
-        print "export AWS_ACCESS_KEY_ID=%s" % res['Credentials']['AccessKeyId']
-        print "export AWS_SECRET_ACCESS_KEY=%s" % res['Credentials']['SecretAccessKey']
-        print "export AWS_SESSION_TOKEN=%s" % res['Credentials']['SessionToken']
-        print "export AWS_SESSION_TOKEN_EXPIRATION='%s'" % res['Credentials']['Expiration']
-
-        print "export AWS_ASSUMED_ROLE_ARN=%s" % res['AssumedRoleUser']['Arn']
-        print "export AWS_ASSUMED_ROLE_PROFILE=%s" % args['--profile']
+        print("export AWS_ACCESS_KEY_ID=%s" % res['Credentials']['AccessKeyId'])
+        print("export AWS_SECRET_ACCESS_KEY=%s" % res['Credentials']['SecretAccessKey'])
+        print("export AWS_SESSION_TOKEN=%s" % res['Credentials']['SessionToken'])
+        print("export AWS_SESSION_TOKEN_EXPIRATION='%s'" %
+		res['Credentials']['Expiration'])
+        print("export AWS_ASSUMED_ROLE_ARN=%s" % res['AssumedRoleUser']['Arn'])
+        print("export AWS_ASSUMED_ROLE_PROFILE=%s" % args['--profile'])
 
 
 if __name__ == "__main__":

@@ -94,7 +94,7 @@ def create_config(args, user_name, assume_role_policies):
                  policy.policy_document['Statement'][0]['Resource'])
         config.set(title, 'role_session_name', user_name+ '@' + policy.name)
         config.set(title, 'source_profile', aws_profile)
-    with open(config_file, 'wb') as cf:
+    with open(config_file, 'w') as cf:
         config.write(cf)
 
 
