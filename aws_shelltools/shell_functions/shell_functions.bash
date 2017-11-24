@@ -200,7 +200,7 @@ EOF
   local params
   case "$#" in
     1 )    case $1 in
-             '-h' ) usage return ;;
+             '-h' ) usage; return ;;
              * ) params="--profile $1" ;;
            esac ;;
     3 | 5) params=''
@@ -212,7 +212,7 @@ EOF
              esac
            done
            params="${params} --profile $1" ;;
-     * )   usage return ;;
+     * )   usage; return ;;
   esac
 
   if [ -n "$params" ]; then
@@ -227,3 +227,32 @@ EOF
 
 }
 
+
+aws-refresh() {
+  usage() {
+    cat << EOF
+
+Reset mfa token. If environment var AWS_ASSUMED_ROLE_PROFILE is already
+set from a previous session, then rerun 'aws sts assume-role' operation
+for that profile.
+
+Usage: aws-refresh [-h]
+
+Args:
+  -h: display help message
+EOF
+  }
+
+  if [ $# -gt 0 ]; then
+    #case $1 in
+    #  '-h' ) usage ;;
+    #  * ) return;;
+    #esac
+    usage
+  else
+    aws-set-mfa-token
+    if [ -n "$AWS_ASSUMED_ROLE_PROFILE" ]; then
+      aws-assume-role $AWS_ASSUMED_ROLE_PROFILE
+    fi
+  fi
+}
