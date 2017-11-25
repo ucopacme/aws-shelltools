@@ -78,10 +78,12 @@ def load_aws_config(args):
                 for f in os.listdir(aws_config_dir)]
 
     config = configparser.SafeConfigParser()
-    try:
-        config.read(config_files)
-    except configparser.MissingSectionHeaderError:
-        pass
+    for f in config_files:
+        try:
+            config.read(f)
+        except configparser.Error as e:
+            print('Can not parse config file "{}".\n{}'.format(f, e))
+            sys.exit(1)
     return config
 
 

@@ -256,3 +256,52 @@ EOF
     fi
   fi
 }
+
+
+
+
+aws-list-roles() {
+  if [ $# -gt 0 ]; then
+    case $1 in
+      '-h' ) echo "Print list of available AWS assume role profiles." ;;
+      * ) return ;;
+    esac
+  else
+    awsassumerole --list-profiles
+  fi
+}
+
+
+aws-export-env() {
+  if [ $# -gt 0 ]; then
+    case $1 in
+      '-h' ) echo "Cache AWS environment vars to local file for use by other shells." ;;
+      * ) return ;;
+    esac
+  else
+    CACHE_DIR=$HOME/.aws/cache
+    EXPORT_FILE=$CACHE_DIR/exported_env
+    [ -d $CACHE_DIR ] || mkdir -p $CACHE_DIR
+    env | grep --color=auto ^AWS | sort > $EXPORT_FILE
+    perl -pi -e "s/^(.*)$/export \1/g" $EXPORT_FILE
+    chmod 600 $EXPORT_FILE
+  fi
+}
+
+
+aws-import-env() {
+  if [ $# -gt 0 ]; then
+    case $1 in
+      '-h' ) echo "Evaluate cached AWS evironment vars into current shell." ;;
+      * ) return ;;
+    esac
+  else
+    CACHE_DIR=$HOME/.aws/cache
+    EXPORT_FILE=$CACHE_DIR/exported_env
+    if [ -f $EXPORT_FILE ]; then
+      list=$(grep -v EXPIRATION $EXPORT_FILE)
+      eval $list
+    fi
+  fi
+}
+

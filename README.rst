@@ -58,6 +58,11 @@ aws-assume-role
   credentials for the specified profile.  Export these credentials to
   environment vars in the current shell.
 
+aws-refresh
+  Reset mfa token. If environment var AWS_ASSUMED_ROLE_PROFILE is already
+  set from a previous session, then rerun 'aws sts assume-role' operation
+  for that profile.
+
 aws-display-assumed-role
   Print current values of AWS assumed role environment vars
   
@@ -66,7 +71,13 @@ aws-whoami
   
 aws-env
   Print current values of all AWS environment vars
-  
+
+aws-export-env
+  Cache AWS environment vars to local file for use by other shells
+
+aws-import-env
+  Evaluate cached AWS evironment vars into current shell
+
 aws-drop-assumed-role
   Reset AWS session environment vars to values prior to assuming role
   
@@ -84,10 +95,13 @@ aws-unset-mfa-token
   aws-list-roles
   aws-set-mfa-token
   aws-assume-role <profile>
+  aws-refresh
   
   aws-display-assumed-role
   aws-whoami
   aws-env
+  aws-export-env
+  aws-import-env
 
   aws-drop-assumed-role
   aws-unset-mfa-token
@@ -97,4 +111,4 @@ aws-unset-mfa-token
 :Author: 
     Ashley Gould (agould@ucop.edu)
 
-:Version: 0.0.5-rc1
+:Version: 0.0.6
