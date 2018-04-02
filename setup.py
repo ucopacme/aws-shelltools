@@ -8,6 +8,7 @@ https://github.com/pypa/sampleproject
 from setuptools import setup, find_packages
 from codecs import open
 from os import path
+from aws_shelltools import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -17,7 +18,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='aws-shelltools',
-    version='0.0.6',
+    version=__version__,
     description='Yet another set of scripts and shell functions for managing AWS profiles and cross account access.',
     long_description=long_description,
     url='https://github.com/ashleygould/aws-shelltools',
@@ -29,13 +30,17 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
     ],
     keywords='aws awscli session',
     packages=find_packages(exclude=['scratch', 'notes' ]),
-    install_requires=['awscli', 'boto3', 'botocore', 'docopt'],
+    install_requires=[
+        'awscli>=1.14.68',
+        'boto3>=1.6.21',
+        'botocore>=1.9.21',
+        'docopt>=0.6.2'
+    ],
     package_data={
         'aws_shelltools': ['shell_functions/*'],
     },

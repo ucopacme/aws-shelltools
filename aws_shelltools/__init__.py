@@ -1,8 +1,12 @@
-"""Common functions for aws_shelltools modules
+"""
+Common functions for aws_shelltools modules
 """
 
 import os
 import boto3
+
+
+__version__ = '0.0.7'
 
 
 def get_profile(profile_name=None):

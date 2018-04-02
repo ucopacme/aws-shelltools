@@ -9,6 +9,12 @@ and cross account access.
 
 **Install**
 
+Python virual environment (preferred)::
+
+  git clone https://github.com/ashleygould/aws-shelltools
+  source ~/path-to-venv/bin/activate
+  pip install -e aws-shelltools/
+
 Site installation::
 
   sudo pip install git+https://www.github.com/ashleygould/aws-shelltools.git 
@@ -105,6 +111,119 @@ aws-unset-mfa-token
 
   aws-drop-assumed-role
   aws-unset-mfa-token
+
+
+Awscli/Python Setup for Newbees
+-------------------------------
+
+The above install insturctions assume you have a working knowledge of python
+and awscli.  If you are new at this, refer to the excellent AWS documentation:
+https://docs.aws.amazon.com/cli/latest/userguide/installing.html
+
+This covers installation of python and python virtual environments for Linux,
+MacOS, and Windows.  Once your python is happy, running the installation of
+`aws-shelltools` will ensure `awscli`and `boto3` are also properly installed.
+
+
+
+
+AWS Access Key Setup
+--------------------
+
+Before you can use any of this stuff, you must create your AWS access key and
+secret access key and confiture your AWS shell profile.  see:
+https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+
+Log into AWS console and create an AWS Access key as per AWS doc.  From your
+shell run the `aws configure` command and cut-n-paste your access key/secret
+key from the console to the command line as prompted.  This creates your
+`default` profile::
+
+  (python3.6) ashleygould$ aws configure
+  AWS Access Key ID [None]: AKI**********W5AFPSNQ
+  AWS Secret Access Key [None]: U/QotA**********************543vuYB
+  Default region name [None]: us-west-2
+  Default output format [None]:
+  
+  (python3.6) ashleygould$ cat .aws/config 
+  [default]
+  region = us-west-2
+  
+  (python3.6) its-agould-9m:~ ashleygould$ aws-whoami 
+  {
+      "UserId": "AIDAJ2SLREGRDKVFOB6CI",
+      "Account": "229341609947",
+      "Arn": "arn:aws:iam::229341609947:user/awsauth/orgadmin/agould"
+  }
+
+
+Configure Assume Role Profiles
+------------------------------
+
+Now you can run `aws-make-config` to generate your assume role profiles based
+on your group membership in a central *auth* account.  These are written to
+`~/.aws/config.d/config.aws_shelltools`::
+
+  (python3.6) ashleygould$ aws-make-config
+  (python3.6) ashleygould$ head ~/.aws/config.d/config.aws_shelltools 
+  [profile ashley-training-OrgAdmin]
+  role_arn = arn:aws:iam::071826132890:role/awsauth/OrgAdmin
+  role_session_name = agould@ashley-training-OrgAdmin
+  source_profile = default
+  
+  [profile Auth-OrgAdmin]
+  role_arn = arn:aws:iam::229341609947:role/awsauth/OrgAdmin
+  role_session_name = agould@Auth-OrgAdmin
+  source_profile = default
+
+See a listing or all your available AWS profiles::
+
+  (python3.6) ashleygould$ aws-list-roles 
+  profile Auth-OrgAdmin
+  profile OrgMaster-OrgAdmin
+  profile ashley-training-OrgAdmin
+  profile eas-dev-OrgAdmin
+  profile eas-prod-OrgAdmin
+  profile eoc-poc-OrgAdmin
+  profile iso-dev-OrgAdmin
+  profile iso-poc-OrgAdmin
+
+Set your MFA token and assume role to one of your configured assume role profiles::
+
+  (python3.6) ashleygould$ aws-set-mfa-token 
+  please enter 6 digit token code for your MFA device: 351918
+  (python3.6) ashleygould$ aws-assume-role ashley-training-OrgAdmin
+  (python3.6) ashleygould$ aws-whoami 
+  {
+      "UserId": "AROAIMADVT2W7CODNCP7W:agould@ashley-training-OrgAdmin",
+      "Account": "071826132890",
+      "Arn": "arn:aws:sts::071826132890:assumed-role/OrgAdmin/agould@ashley-training-OrgAdmin"
+  }
+
+You can shorten the profile name at the command line to a unique prefix::
+
+  (python3.6) ashleygould$ aws-assume-role eas
+  Your specified profile 'eas' matches multiple configured profiles. Select one from 
+  the list below and try again: 
+    eas-dev-OrgAdmin eas-prod-OrgAdmin 
+    ucop-itssandbox-eas-OrgAdmin
+  (python3.6) ashleygould$ aws-assume-role eas-dev
+  (python3.6) ashleygould$ aws-whoami 
+  {
+      "UserId": "AROAJFPJVRDRDFUZJLZVG:agould@eas-dev-OrgAdmin",
+      "Account": "300910334949",
+      "Arn": "arn:aws:sts::300910334949:assumed-role/OrgAdmin/agould@eas-dev-OrgAdmin"
+  }
+
+
+
+
+
+
+**codecommit**
+
+git config --global credential.helper '!aws codecommit credential-helper $@'
+git config --global credential.UseHttpPath true
 
 
 
