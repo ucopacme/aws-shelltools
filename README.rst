@@ -184,9 +184,6 @@ See a listing or all your available AWS profiles::
   profile ashley-training-OrgAdmin
   profile eas-dev-OrgAdmin
   profile eas-prod-OrgAdmin
-  profile eoc-poc-OrgAdmin
-  profile iso-dev-OrgAdmin
-  profile iso-poc-OrgAdmin
 
 Set your MFA token and assume role to one of your configured assume role profiles::
 
@@ -216,18 +213,18 @@ You can shorten the profile name at the command line to a unique prefix::
   }
 
 
+Working With Codecommit Repositories
+------------------------------------
 
+To access codecommit repositories from the commandline after assuming a role,
+you must first configure git to use the AWS codecommit credential-helper::
 
-
-
-**codecommit**
-
-git config --global credential.helper '!aws codecommit credential-helper $@'
-git config --global credential.UseHttpPath true
+  git config --global credential.helper '!aws codecommit credential-helper $@'
+  git config --global credential.UseHttpPath true
 
 
 
 :Author: 
     Ashley Gould (agould@ucop.edu)
 
-:Version: 0.0.6
+:Version: 0.0.7
