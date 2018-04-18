@@ -27,19 +27,20 @@ try:
 except ImportError:
     import configparser
 
+from aws_shelltools import util
 
-DEFAULT_PROFILE = 'default'
+
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
 
 
 
-def get_profile(args):
-    if args['--profile']:
-        return args['--profile']
-    if os.environ.get('AWS_PROFILE'):
-        return os.environ.get('AWS_PROFILE')
-    return DEFAULT_PROFILE
+#def get_profile(args):
+#    if args['--profile']:
+#        return args['--profile']
+#    if os.environ.get('AWS_PROFILE'):
+#        return os.environ.get('AWS_PROFILE')
+#    return DEFAULT_PROFILE
 
 
 def get_user_name():
@@ -78,7 +79,7 @@ def create_config(args, user_name, assume_role_policies):
     """
     Write the config file into aws config dir.
     """
-    aws_profile = get_profile(args)
+    aws_profile = util.get_profile(args['--profile'])
     aws_config_dir = get_config_dir(args)
     try: 
         os.makedirs(aws_config_dir)

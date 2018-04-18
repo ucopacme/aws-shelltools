@@ -34,23 +34,25 @@ try:
 except ImportError:
     import configparser
 
+from aws_shelltools import util
+
 
 DEFAULT_PROFILE = 'default'
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
 
 
-def get_session(aws_profile):
-    """
-    Return boto3 session object for a given profile.  Try to 
-    obtain client credentials from shell environment.  This should
-    capture MFA credential if present in user's shell env.
-    """
-    return boto3.Session(
-            profile_name=aws_profile,
-            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', ''),
-            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
-            aws_session_token=os.environ.get('AWS_SESSION_TOKEN', ''))
+#def get_session(aws_profile):
+#    """
+#    Return boto3 session object for a given profile.  Try to 
+#    obtain client credentials from shell environment.  This should
+#    capture MFA credential if present in user's shell env.
+#    """
+#    return boto3.Session(
+#            profile_name=aws_profile,
+#            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', ''),
+#            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
+#            aws_session_token=os.environ.get('AWS_SESSION_TOKEN', ''))
 
 
 def load_aws_config(args):
@@ -136,7 +138,7 @@ def assume_role_from_profile(args):
     config = load_aws_config(args)
     (role_arn, source_profile, role_session_name) = parse_assume_role_profile(
             args, config)
-    session = get_session(source_profile)
+    session = util.get_session(source_profile)
     sts_client = session.client('sts')
     try:
         response = sts_client.assume_role(
