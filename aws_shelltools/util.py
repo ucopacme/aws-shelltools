@@ -5,19 +5,37 @@ Common functions for aws_shelltools modules
 import os
 import boto3
 
-def get_profile(profile_name=None):
-    """Determine and return the AWS profile.  Check in order:
-      the value of 'profile_name',
-      the user's shell environment,
-      the 'default'.
-    """
-    if profile_name:
-        aws_profile = profile_name
-    elif os.environ.get('AWS_PROFILE'):
-        aws_profile = os.environ.get('AWS_PROFILE')
-    else:
-        aws_profile = 'default'
+DEFAULT_PROFILE = 'default'
+DEFAULT_CONFIG_FILE = '~/.aws/config'
+DEFAULT_CONFIG_DIR = '~/.aws/config.d'
+
+
+def get_profile(aws_profile=None):
+    """Determine the AWS profile"""
+    if not aws_profile:
+        if os.environ.get('AWS_PROFILE'):
+            aws_profile = os.environ.get('AWS_PROFILE')
+        else:
+            aws_profile = DEFAULT_PROFILE
     return aws_profile
+
+
+def get_config_file(config_file=None):
+    if not config_file:
+        if os.environ.get('AWS_CONFIG_FILE'):
+            config_file = os.environ.get('AWS_CONFIG_FILE')
+        else:
+            config_file = DEFAULT_CONFIG_FILE
+    return os.path.expanduser(config_file)
+
+
+def get_config_dir(config_dir=None):
+    if not config_dir:
+        if os.environ.get('AWS_CONFIG_DIR'):
+            config_dir = os.environ.get('AWS_CONFIG_DIR')
+        else:
+            config_dir = DEFAULT_CONFIG_DIR
+    return os.path.expanduser(config_dir)
 
 
 def get_session(profile_name):

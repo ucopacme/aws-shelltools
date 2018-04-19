@@ -37,40 +37,9 @@ except ImportError:
 from aws_shelltools import util
 
 
-DEFAULT_PROFILE = 'default'
-DEFAULT_CONFIG_FILE = '~/.aws/config'
-DEFAULT_CONFIG_DIR = '~/.aws/config.d'
-
-
-#def get_session(aws_profile):
-#    """
-#    Return boto3 session object for a given profile.  Try to 
-#    obtain client credentials from shell environment.  This should
-#    capture MFA credential if present in user's shell env.
-#    """
-#    return boto3.Session(
-#            profile_name=aws_profile,
-#            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', ''),
-#            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
-#            aws_session_token=os.environ.get('AWS_SESSION_TOKEN', ''))
-
-
 def load_aws_config(args):
-    if args['--config']:
-        aws_config_file = args['--config']
-    elif os.environ.get('AWS_CONFIG_FILE'):
-        aws_config_file = os.environ.get('AWS_CONFIG_FILE')
-    else:
-        aws_config_file = DEFAULT_CONFIG_FILE
-    aws_config_file = os.path.expanduser(aws_config_file)
-        
-    if args['--config-dir']:
-        aws_config_dir = args['--config-dir']
-    elif os.environ.get('AWS_CONFIG_DIR'):
-        aws_config_dir = os.environ.get('AWS_CONFIG_DIR')
-    else:
-        aws_config_dir = DEFAULT_CONFIG_DIR
-    aws_config_dir = os.path.expanduser(aws_config_dir)
+    aws_config_file = util.get_config_file(args['--config'])
+    aws_config_dir = util.get_config_dir(args['--config-dir'])
 
     config_files = []
     if os.path.isfile(aws_config_file):
@@ -90,10 +59,7 @@ def load_aws_config(args):
 
 
 def list_config_profiles(config):
-    if os.environ.get('AWS_PROFILE'):
-        aws_profile = os.environ.get('AWS_PROFILE')
-    else:
-        aws_profile = DEFAULT_PROFILE
+    aws_profile = util.get_profile(None)
     return [p for p in sorted(config.sections())
             if (config.has_option(p, 'source_profile')
             and config.get(p, 'source_profile') == aws_profile)]
