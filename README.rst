@@ -9,20 +9,15 @@ and cross account access.
 
 **Install**
 
-Python virual environment (preferred)::
+Install into python virual environment::
 
-  git clone https://github.com/ashleygould/aws-shelltools
   source ~/path-to-venv/bin/activate
+  pip install https://github.com/ucopacme/aws-shelltools/archive/master.zip
+
+Install from editable local repository::
+
+  git clone https://github.com/ucopacme/aws-shelltools
   pip install -e aws-shelltools/
-
-Site installation::
-
-  sudo pip install git+https://www.github.com/ashleygould/aws-shelltools.git 
-
-Local user installation::
-
-  git clone https://github.com/ashleygould/aws-shelltools
-  pip install --user -e aws-shelltools/
 
 On RHEL6 you may need to update setuptools as well:
 
@@ -32,9 +27,6 @@ On RHEL6 you may need to update setuptools as well:
 **Uninstall**::
 
   pip uninstall aws-shelltools
-
-  # if installed as local user also run:
-  rm ~/.local/bin/{awstoken,awsassumerole,awsconfig,aws-shelltools-setup}
 
 
 **Configure**::
