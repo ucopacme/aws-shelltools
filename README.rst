@@ -159,12 +159,12 @@ on your group membership in a central *auth* account.  These are written to
   (python3.6) ashleygould$ aws-make-config
   (python3.6) ashleygould$ head ~/.aws/config.d/config.aws_shelltools 
   [profile ashley-training-OrgAdmin]
-  role_arn = arn:aws:iam::071826132890:role/awsauth/OrgAdmin
+  role_arn = arn:aws:iam::111111111111:role/awsauth/OrgAdmin
   role_session_name = agould@ashley-training-OrgAdmin
   source_profile = default
   
   [profile Auth-OrgAdmin]
-  role_arn = arn:aws:iam::229341609947:role/awsauth/OrgAdmin
+  role_arn = arn:aws:iam::222222222222:role/awsauth/OrgAdmin
   role_session_name = agould@Auth-OrgAdmin
   source_profile = default
 
@@ -185,8 +185,8 @@ Set your MFA token and assume role to one of your configured assume role profile
   (python3.6) ashleygould$ aws-whoami 
   {
       "UserId": "AROAIMADVT2W7CODNCP7W:agould@ashley-training-OrgAdmin",
-      "Account": "071826132890",
-      "Arn": "arn:aws:sts::071826132890:assumed-role/OrgAdmin/agould@ashley-training-OrgAdmin"
+      "Account": "111111111111",
+      "Arn": "arn:aws:sts::111111111111:assumed-role/OrgAdmin/agould@ashley-training-OrgAdmin"
   }
 
 You can shorten the profile name at the command line to a unique prefix::
@@ -200,8 +200,8 @@ You can shorten the profile name at the command line to a unique prefix::
   (python3.6) ashleygould$ aws-whoami 
   {
       "UserId": "AROAJFPJVRDRDFUZJLZVG:agould@eas-dev-OrgAdmin",
-      "Account": "300910334949",
-      "Arn": "arn:aws:sts::300910334949:assumed-role/OrgAdmin/agould@eas-dev-OrgAdmin"
+      "Account": "111111111111",
+      "Arn": "arn:aws:sts::111111111111:assumed-role/OrgAdmin/agould@eas-dev-OrgAdmin"
   }
 
 
@@ -219,4 +219,4 @@ you must first configure git to use the AWS codecommit credential-helper::
 :Author: 
     Ashley Gould (agould@ucop.edu)
 
-:Version: 0.0.7
+:Version: 0.0.8
