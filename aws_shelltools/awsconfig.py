@@ -21,6 +21,7 @@ Options:
 
 import os
 import boto3
+import yaml
 from docopt import docopt
 try:
     import ConfigParser as configparser
@@ -32,6 +33,8 @@ from aws_shelltools import util
 
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
+BUCKET_NAME = 'ait-awsorgs-updates'
+OBJECT_NAME = 'accounts-file.yaml'
 
 
 
@@ -74,6 +77,19 @@ def get_config_dir(args):
         config_dir = DEFAULT_CONFIG_DIR
     return os.path.expanduser(config_dir)
 
+def get_deployed_accounts_from_s3(BUCKET_NAME,OBJECT_NAME):
+    try:
+        obj = s3.Object(BUCKET_NAME,OBJECT_NAME)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print("The bucket does not exist.")
+            return None
+        else:
+            raise
+    body = obj.get()['Body'].read()
+    deployed_accounts = yaml.load(body)
+    return deployed_accounts
+
 
 def create_config(args, user_name, assume_role_policies):
     """
@@ -104,8 +120,9 @@ def create_config(args, user_name, assume_role_policies):
 def main():
     args = docopt(__doc__)
     user_name = get_user_name()
+    deployed_accounts = get_deployed_accounts_from_s3()
     assume_role_policies = get_assume_role_policies(user_name)
-    create_config(args, user_name, assume_role_policies)
+    create_config(args, user_name, assume_role_policies, deployed_accounts)
 
 
 
