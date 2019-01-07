@@ -77,7 +77,7 @@ def get_config_dir(args):
         config_dir = DEFAULT_CONFIG_DIR
     return os.path.expanduser(config_dir)
 
-def get_deployed_accounts_from_s3(BUCKET_NAME,OBJECT_NAME):
+def get_deployed_accounts_from_s3(bucket_name,object_name):
     try:
         obj = s3.Object(BUCKET_NAME,OBJECT_NAME)
     except botocore.exceptions.ClientError as e:
@@ -120,7 +120,7 @@ def create_config(args, user_name, assume_role_policies):
 def main():
     args = docopt(__doc__)
     user_name = get_user_name()
-    deployed_accounts = get_deployed_accounts_from_s3()
+    deployed_accounts = get_deployed_accounts_from_s3(BUCKET_NAME,OBJECT_NAME)
     assume_role_policies = get_assume_role_policies(user_name)
     create_config(args, user_name, assume_role_policies, deployed_accounts)
 
