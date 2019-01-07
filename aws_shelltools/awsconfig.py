@@ -22,6 +22,7 @@ Options:
 import os
 import boto3
 import yaml
+from botocore.exceptions import ClientError
 from docopt import docopt
 try:
     import ConfigParser as configparser
@@ -29,11 +30,14 @@ except ImportError:
     import configparser
 
 from aws_shelltools import util
+from awsorgs.loginprofile import list_delegations
+from awsorgs.utils import lookup
 
 
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
-BUCKET_NAME = 'ait-awsorgs-updates'
+#BUCKET_NAME = 'ait-awsorgs-updates'
+BUCKET_NAME = 'awsauth-962936672038'
 OBJECT_NAME = 'accounts-file.yaml'
 
 
@@ -54,20 +58,6 @@ def get_user_name():
     return sts.get_caller_identity()['Arn'].split('/')[-1]
 
 
-def get_assume_role_policies(user_name):
-    """
-    returns a list of IAM policy objects
-    """
-    iam = boto3.resource('iam')
-    user = iam.User(user_name)
-    groups = list(user.groups.all())
-    assume_role_policies = []
-    for group in user.groups.all():
-        assume_role_policies += [p for p in list(group.policies.all()) if
-                p.policy_document['Statement'][0]['Action'] == 'sts:AssumeRole']
-    return assume_role_policies 
-
-
 def get_config_dir(args):
     if args['--config-dir']:
         config_dir = args['--config-dir']
@@ -77,10 +67,12 @@ def get_config_dir(args):
         config_dir = DEFAULT_CONFIG_DIR
     return os.path.expanduser(config_dir)
 
-def get_deployed_accounts_from_s3(bucket_name,object_name):
+
+def get_deployed_accounts_from_s3(bucket_name, object_name):
+    s3 = boto3.resource('s3')
     try:
-        obj = s3.Object(BUCKET_NAME,OBJECT_NAME)
-    except botocore.exceptions.ClientError as e:
+        obj = s3.Object(bucket_name, object_name)
+    except ClientError as e:
         if e.response['Error']['Code'] == "404":
             print("The bucket does not exist.")
             return None
@@ -91,7 +83,7 @@ def get_deployed_accounts_from_s3(bucket_name,object_name):
     return deployed_accounts
 
 
-def create_config(args, user_name, assume_role_policies):
+def create_config(args, user_name, role_arns, deployed_accounts):
     """
     Write the config file into aws config dir.
     """
@@ -104,12 +96,20 @@ def create_config(args, user_name, assume_role_policies):
             raise
     config_file = os.path.join(aws_config_dir, 'config.aws_shelltools')
     config = configparser.SafeConfigParser()
-    for policy in assume_role_policies:
+
+
+    #for policy in assume_role_policies:
+    for arn in assume_role_arns:
+        # generate title from account alias and role name of arn
+        #alias = lookup(lkjlkj)
+        # role_name = parse the arn string
         title = "profile %s" % policy.name
+        #title = "profile %s-%s" % (alias, role_name)
         config.add_section(title)
         config.set(title, 'role_arn',
                  policy.policy_document['Statement'][0]['Resource'])
-        config.set(title, 'role_session_name', user_name+ '@' + policy.name)
+        #config.set(title, 'role_arn', arn)
+        config.set(title, 'role_session_name', user_name+ '@' + policy.name) # fix this too
         config.set(title, 'source_profile', aws_profile)
     with open(config_file, 'w') as cf:
         config.write(cf)
@@ -120,9 +120,12 @@ def create_config(args, user_name, assume_role_policies):
 def main():
     args = docopt(__doc__)
     user_name = get_user_name()
+    iam = boto3.resource('iam')
+    user = iam.User(user_name)
     deployed_accounts = get_deployed_accounts_from_s3(BUCKET_NAME,OBJECT_NAME)
-    assume_role_policies = get_assume_role_policies(user_name)
-    create_config(args, user_name, assume_role_policies, deployed_accounts)
+    role_arns = list_delegations(None, user, deployed_accounts)
+    print(role_arns)
+    create_config(args, user_name, role_arns, deployed_accounts)
 
 
 
