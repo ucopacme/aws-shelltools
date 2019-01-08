@@ -32,12 +32,13 @@ except ImportError:
 from aws_shelltools import util
 from awsorgs.loginprofile import list_delegations
 from awsorgs.utils import lookup
+from S3_OBJECT_KEY import get_s3_bucket_name
+
 
 
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
 BUCKET_NAME = 'ait-awsorgs-update'
-#BUCKET_NAME = 'awsauth-962936672038'
 OBJECT_NAME = 'accounts-file.yaml'
 
 
