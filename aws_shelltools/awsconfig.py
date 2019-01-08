@@ -32,7 +32,7 @@ except ImportError:
 from aws_shelltools import util
 from awsorgs.loginprofile import list_delegations
 from awsorgs.utils import lookup
-from S3_OBJECT_KEY import get_s3_bucket_name
+from awsorgs.utils import get_s3_bucket_name,S3_OBJECT_KEY
 
 
 
