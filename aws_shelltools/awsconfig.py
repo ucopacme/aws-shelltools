@@ -38,8 +38,8 @@ from awsorgs.utils import get_s3_bucket_name,S3_OBJECT_KEY
 
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
-BUCKET_NAME = 'ait-awsorgs-update'
-OBJECT_NAME = 'accounts-file.yaml'
+#BUCKET_NAME = 'ait-awsorgs-update'
+#OBJECT_NAME = 'accounts-file.yaml'
 
 
 
@@ -119,7 +119,8 @@ def main():
     user_name = get_user_name()
     iam = boto3.resource('iam')
     user = iam.User(user_name)
-    deployed_accounts = get_deployed_accounts_from_s3(BUCKET_NAME,OBJECT_NAME)
+    s3_bucket = get_s3_bucket_name()
+    deployed_accounts = get_deployed_accounts_from_s3(s3_bucket,S3_OBJECT_KEY)
     role_arns = list_delegations(None, user, deployed_accounts)
     create_config(args, user_name, role_arns, deployed_accounts)
 
