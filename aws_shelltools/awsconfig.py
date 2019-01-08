@@ -36,8 +36,8 @@ from awsorgs.utils import lookup
 
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
-#BUCKET_NAME = 'ait-awsorgs-updates'
-BUCKET_NAME = 'awsauth-962936672038'
+BUCKET_NAME = 'ait-awsorgs-update'
+#BUCKET_NAME = 'awsauth-962936672038'
 OBJECT_NAME = 'accounts-file.yaml'
 
 
@@ -98,18 +98,14 @@ def create_config(args, user_name, role_arns, deployed_accounts):
     config = configparser.SafeConfigParser()
 
 
-    #for policy in assume_role_policies:
-    for arn in assume_role_arns:
-        # generate title from account alias and role name of arn
-        #alias = lookup(lkjlkj)
-        # role_name = parse the arn string
-        title = "profile %s" % policy.name
-        #title = "profile %s-%s" % (alias, role_name)
+    for arn in role_arns:
+        account_id = arn.split(':')[4]
+        alias = lookup(deployed_accounts, 'Id', account_id, 'Alias')
+        role_name = arn.split(':')[-1].split('/')[-1]
+        title = "profile %s-%s" % (alias, role_name)
         config.add_section(title)
-        config.set(title, 'role_arn',
-                 policy.policy_document['Statement'][0]['Resource'])
-        #config.set(title, 'role_arn', arn)
-        config.set(title, 'role_session_name', user_name+ '@' + policy.name) # fix this too
+        config.set(title, 'role_arn', arn)
+        config.set(title, 'role_session_name', user_name+ '@' + role_name) 
         config.set(title, 'source_profile', aws_profile)
     with open(config_file, 'w') as cf:
         config.write(cf)
@@ -124,7 +120,6 @@ def main():
     user = iam.User(user_name)
     deployed_accounts = get_deployed_accounts_from_s3(BUCKET_NAME,OBJECT_NAME)
     role_arns = list_delegations(None, user, deployed_accounts)
-    print(role_arns)
     create_config(args, user_name, role_arns, deployed_accounts)
 
 
