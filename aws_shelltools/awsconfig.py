@@ -31,16 +31,11 @@ except ImportError:
 
 from aws_shelltools import util
 from awsorgs.loginprofile import list_delegations
-from awsorgs.utils import lookup
-from awsorgs.utils import get_s3_bucket_name,S3_OBJECT_KEY
-
+from awsorgs.utils import lookup, get_s3_bucket_name, S3_OBJECT_KEY
 
 
 DEFAULT_CONFIG_FILE = '~/.aws/config'
 DEFAULT_CONFIG_DIR = '~/.aws/config.d'
-#BUCKET_NAME = 'ait-awsorgs-update'
-#OBJECT_NAME = 'accounts-file.yaml'
-
 
 
 #def get_profile(args):
@@ -97,11 +92,11 @@ def create_config(args, user_name, role_arns, deployed_accounts):
             raise
     config_file = os.path.join(aws_config_dir, 'config.aws_shelltools')
     config = configparser.SafeConfigParser()
-
-
     for arn in role_arns:
         account_id = arn.split(':')[4]
         alias = lookup(deployed_accounts, 'Id', account_id, 'Alias')
+        if alias is None:
+            alias = account_id
         role_name = arn.split(':')[-1].split('/')[-1]
         title = "profile %s-%s" % (alias, role_name)
         config.add_section(title)
@@ -112,18 +107,15 @@ def create_config(args, user_name, role_arns, deployed_accounts):
         config.write(cf)
 
 
-
-
 def main():
     args = docopt(__doc__)
     user_name = get_user_name()
     iam = boto3.resource('iam')
     user = iam.User(user_name)
     s3_bucket = get_s3_bucket_name()
-    deployed_accounts = get_deployed_accounts_from_s3(s3_bucket,S3_OBJECT_KEY)
+    deployed_accounts = get_deployed_accounts_from_s3(s3_bucket, S3_OBJECT_KEY)
     role_arns = list_delegations(None, user, deployed_accounts)
     create_config(args, user_name, role_arns, deployed_accounts)
-
 
 
 if __name__ == "__main__":
