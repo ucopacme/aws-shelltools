@@ -147,8 +147,8 @@ key from the console to the command line as prompted.  This creates your
   (python3.6) its-agould-9m:~ ashleygould$ aws-whoami 
   {
       "UserId": "AIDAJ2SLREGRDKVFOB6CI",
-      "Account": "229341609947",
-      "Arn": "arn:aws:iam::229341609947:user/awsauth/orgadmin/agould"
+      "Account": "112233445566",
+      "Arn": "arn:aws:iam::112233445566:user/awsauth/orgadmin/agould"
   }
 
 
