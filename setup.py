@@ -39,7 +39,8 @@ setup(
         'awscli>=1.14.68',
         'boto3>=1.6.21',
         'botocore>=1.9.21',
-        'docopt>=0.6.2'
+        'docopt>=0.6.2',
+        'aws-orgs',
     ],
     package_data={
         'aws_shelltools': ['shell_functions/*'],

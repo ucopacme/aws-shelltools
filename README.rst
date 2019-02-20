@@ -9,19 +9,22 @@ and cross account access.
 
 **Install**
 
+aws-shelltools is not yet in PyPI, so we install from github directly.
+
+aws-shelltools now has dependancy on package aws-orgs, which is also not yet in PyPI.
+
 Install into python virual environment::
 
   source ~/path-to-venv/bin/activate
+  pip install https://github.com/ucopacme/aws-orgs/archive/master.zip
   pip install https://github.com/ucopacme/aws-shelltools/archive/master.zip
 
 Install from editable local repository::
 
   git clone https://github.com/ucopacme/aws-shelltools
-  pip install -e aws-shelltools/
-
-On RHEL6 you may need to update setuptools as well:
-
-  sudo pip install -U setuptools
+  cd aws-shelltools
+  pip install -r requirements.txt
+  pip install -e .
 
 
 **Uninstall**::
@@ -144,8 +147,8 @@ key from the console to the command line as prompted.  This creates your
   (python3.6) its-agould-9m:~ ashleygould$ aws-whoami 
   {
       "UserId": "AIDAJ2SLREGRDKVFOB6CI",
-      "Account": "229341609947",
-      "Arn": "arn:aws:iam::229341609947:user/awsauth/orgadmin/agould"
+      "Account": "112233445566",
+      "Arn": "arn:aws:iam::112233445566:user/awsauth/orgadmin/agould"
   }
 
 
@@ -216,7 +219,3 @@ you must first configure git to use the AWS codecommit credential-helper::
 
 
 
-:Author: 
-    Ashley Gould (agould@ucop.edu)
-
-:Version: 0.0.8
