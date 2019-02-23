@@ -98,10 +98,12 @@ def create_config(args, user_name, role_arns, deployed_accounts):
         if alias is None:
             alias = account_id
         role_name = arn.split(':')[-1].split('/')[-1]
-        title = "profile %s-%s" % (alias, role_name)
+        title = 'profile {}-{}'.format(alias, role_name)
         config.add_section(title)
         config.set(title, 'role_arn', arn)
-        config.set(title, 'role_session_name', '{}@{}'.format(user_name, title)) 
+        config.set(
+            title, 'role_session_name', '{}@{}-{}'.format(user_name, alias, role_name)
+        ) 
         config.set(title, 'source_profile', aws_profile)
     with open(config_file, 'w') as cf:
         config.write(cf)
