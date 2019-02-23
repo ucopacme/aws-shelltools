@@ -43,16 +43,17 @@ The shelltools:
 
 aws-profile
   Set or display value of shell environment var AWS_PROFILE.
-
-aws-make-config
-  Generate aws client config file by listing group assume role policies.
-  
-aws-list-roles
-  Print list of available AWS assume role profiles.
   
 aws-set-mfa-token
   Request temporary session credentials from AWS STS.  Export these credentials
   to environment vars in the current shell.
+
+aws-make-config
+  Generate aws client config file by listing group assume role policies.  You
+  must set your MFA token before you run this command.
+  
+aws-list-roles
+  Print list of available AWS assume role profiles.
 
 aws-assume-role
   Run 'aws sts assume-role' operation to obtain temporary assumed role
@@ -92,9 +93,9 @@ aws-unset-mfa-token
   # Run each command with -h option for full usage info.
 
   aws-profile <profile>
+  aws-set-mfa-token
   aws-make-config
   aws-list-roles
-  aws-set-mfa-token
   aws-assume-role <profile>
   aws-refresh
   
@@ -108,8 +109,70 @@ aws-unset-mfa-token
   aws-unset-mfa-token
 
 
-Awscli/Python Setup for Newbees
--------------------------------
+Configure Assume Role Profiles
+------------------------------
+
+If you have not yet set up your AWS CLI access, skip to section `Awscli/Python Setup`_
+before proceeding.
+
+Set your MFA token and assume role to one of your configured assume role profiles::
+
+  (python3.6) ashleygould$ aws-set-mfa-token 
+  please enter 6 digit token code for your MFA device: 351918
+  (python3.6) ashleygould$ aws-assume-role ashley-training-OrgAdmin
+  (python3.6) ashleygould$ aws-whoami 
+  {
+      "UserId": "AROAIMADVT2W7CODNCP7W:agould@ashley-training-OrgAdmin",
+      "Account": "111111111111",
+      "Arn": "arn:aws:sts::111111111111:assumed-role/OrgAdmin/agould@ashley-training-OrgAdmin"
+  }
+
+Now you can run `aws-make-config` to generate your assume role profiles based
+on your group membership in a central *auth* account.  These are written to
+`~/.aws/config.d/config.aws_shelltools`::
+
+  (python3.6) ashleygould$ aws-make-config
+  (python3.6) ashleygould$ head ~/.aws/config.d/config.aws_shelltools 
+  [profile ashley-training-OrgAdmin]
+  role_arn = arn:aws:iam::111111111111:role/awsauth/OrgAdmin
+  role_session_name = agould@ashley-training-OrgAdmin
+  source_profile = default
+  
+  [profile Auth-OrgAdmin]
+  role_arn = arn:aws:iam::222222222222:role/awsauth/OrgAdmin
+  role_session_name = agould@Auth-OrgAdmin
+  source_profile = default
+
+See a listing or all your available AWS profiles::
+
+  (python3.6) ashleygould$ aws-list-roles 
+  profile Auth-OrgAdmin
+  profile OrgMaster-OrgAdmin
+  profile ashley-training-OrgAdmin
+  profile eas-dev-OrgAdmin
+  profile eas-prod-OrgAdmin
+
+
+You can shorten the profile name at the command line to a unique prefix::
+
+  (python3.6) ashleygould$ aws-assume-role eas
+  Your specified profile 'eas' matches multiple configured profiles. Select one from 
+  the list below and try again: 
+    eas-dev-OrgAdmin eas-prod-OrgAdmin 
+    ucop-itssandbox-eas-OrgAdmin
+  (python3.6) ashleygould$ aws-assume-role eas-dev
+  (python3.6) ashleygould$ aws-whoami 
+  {
+      "UserId": "AROAJFPJVRDRDFUZJLZVG:agould@eas-dev-OrgAdmin",
+      "Account": "111111111111",
+      "Arn": "arn:aws:sts::111111111111:assumed-role/OrgAdmin/agould@eas-dev-OrgAdmin"
+  }
+
+
+
+
+Awscli/Python Setup
+-------------------
 
 The above install insturctions assume you have a working knowledge of python
 and awscli.  If you are new at this, refer to the excellent AWS documentation:
@@ -150,63 +213,6 @@ key from the console to the command line as prompted.  This creates your
       "Account": "112233445566",
       "Arn": "arn:aws:iam::112233445566:user/awsauth/orgadmin/agould"
   }
-
-
-Configure Assume Role Profiles
-------------------------------
-
-Now you can run `aws-make-config` to generate your assume role profiles based
-on your group membership in a central *auth* account.  These are written to
-`~/.aws/config.d/config.aws_shelltools`::
-
-  (python3.6) ashleygould$ aws-make-config
-  (python3.6) ashleygould$ head ~/.aws/config.d/config.aws_shelltools 
-  [profile ashley-training-OrgAdmin]
-  role_arn = arn:aws:iam::111111111111:role/awsauth/OrgAdmin
-  role_session_name = agould@ashley-training-OrgAdmin
-  source_profile = default
-  
-  [profile Auth-OrgAdmin]
-  role_arn = arn:aws:iam::222222222222:role/awsauth/OrgAdmin
-  role_session_name = agould@Auth-OrgAdmin
-  source_profile = default
-
-See a listing or all your available AWS profiles::
-
-  (python3.6) ashleygould$ aws-list-roles 
-  profile Auth-OrgAdmin
-  profile OrgMaster-OrgAdmin
-  profile ashley-training-OrgAdmin
-  profile eas-dev-OrgAdmin
-  profile eas-prod-OrgAdmin
-
-Set your MFA token and assume role to one of your configured assume role profiles::
-
-  (python3.6) ashleygould$ aws-set-mfa-token 
-  please enter 6 digit token code for your MFA device: 351918
-  (python3.6) ashleygould$ aws-assume-role ashley-training-OrgAdmin
-  (python3.6) ashleygould$ aws-whoami 
-  {
-      "UserId": "AROAIMADVT2W7CODNCP7W:agould@ashley-training-OrgAdmin",
-      "Account": "111111111111",
-      "Arn": "arn:aws:sts::111111111111:assumed-role/OrgAdmin/agould@ashley-training-OrgAdmin"
-  }
-
-You can shorten the profile name at the command line to a unique prefix::
-
-  (python3.6) ashleygould$ aws-assume-role eas
-  Your specified profile 'eas' matches multiple configured profiles. Select one from 
-  the list below and try again: 
-    eas-dev-OrgAdmin eas-prod-OrgAdmin 
-    ucop-itssandbox-eas-OrgAdmin
-  (python3.6) ashleygould$ aws-assume-role eas-dev
-  (python3.6) ashleygould$ aws-whoami 
-  {
-      "UserId": "AROAJFPJVRDRDFUZJLZVG:agould@eas-dev-OrgAdmin",
-      "Account": "111111111111",
-      "Arn": "arn:aws:sts::111111111111:assumed-role/OrgAdmin/agould@eas-dev-OrgAdmin"
-  }
-
 
 Working With Codecommit Repositories
 ------------------------------------

@@ -101,7 +101,7 @@ def create_config(args, user_name, role_arns, deployed_accounts):
         title = "profile %s-%s" % (alias, role_name)
         config.add_section(title)
         config.set(title, 'role_arn', arn)
-        config.set(title, 'role_session_name', user_name+ '@' + role_name) 
+        config.set(title, 'role_session_name', '{}@{}'.format(user_name, title)) 
         config.set(title, 'source_profile', aws_profile)
     with open(config_file, 'w') as cf:
         config.write(cf)
