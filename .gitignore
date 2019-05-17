@@ -2,3 +2,5 @@
 *.swo
 *.pyc
 *.egg-info
+build/
+dist/
