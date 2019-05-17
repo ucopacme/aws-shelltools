@@ -14,6 +14,21 @@ aws-whoami() {
 }
 
 
+aws-region ()
+{
+  if [ $# -gt 0 ]; then
+    case $1 in
+      '-h' ) echo "Print or set your default region env var'";;
+      * ) region=$1;;
+    esac
+    if [ -n "$region" ]; then
+        export AWS_DEFAULT_REGION=$1;
+    else
+        echo $AWS_DEFAULT_REGION;
+    fi
+}
+
+
 aws-env() {
   if [ $# -gt 0 ]; then
     case $1 in

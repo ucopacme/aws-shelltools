@@ -9,15 +9,10 @@ and cross account access.
 
 **Install**
 
-aws-shelltools is not yet in PyPI, so we install from github directly.
-
-aws-shelltools now has dependancy on package aws-orgs, which is also not yet in PyPI.
-
 Install into python virual environment::
 
   source ~/path-to-venv/bin/activate
-  pip install https://github.com/ucopacme/aws-orgs/archive/master.zip
-  pip install https://github.com/ucopacme/aws-shelltools/archive/master.zip
+  pip install aws-shelltools
 
 Install from editable local repository::
 
