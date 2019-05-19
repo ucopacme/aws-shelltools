@@ -5,7 +5,7 @@
 aws-whoami() {
   if [ $# -gt 0 ]; then
     case $1 in
-      '-h' ) echo "Print output of 'aws sts get-caller-identity'";;
+      '-h' ) echo "Print output of 'aws sts get-caller-identity";;
       * ) return;;
     esac
   else
@@ -18,14 +18,12 @@ aws-region ()
 {
   if [ $# -gt 0 ]; then
     case $1 in
-      '-h' ) echo "Print or set your default region env var'";;
-      * ) region=$1;;
+      '-h' ) echo "Set or display value of shell environment var AWS_DEFAULT_PROFILE";;
+      * ) export AWS_DEFAULT_REGION=$region;;
     esac
-    if [ -n "$region" ]; then
-        export AWS_DEFAULT_REGION=$1;
-    else
-        echo $AWS_DEFAULT_REGION;
-    fi
+  else
+      echo $AWS_DEFAULT_REGION;
+  fi
 }
 
 

@@ -37,7 +37,13 @@ The shelltools:
 ---------------
 
 aws-profile
-  Set or display value of shell environment var AWS_PROFILE.
+  Set or display value of shell environment var AWS_PROFILE
+
+aws-region
+  Set or display value of shell environment var AWS_DEFAULT_PROFILE
+  
+aws-env
+  Print current values of all AWS environment vars
   
 aws-set-mfa-token
   Request temporary session credentials from AWS STS.  Export these credentials
@@ -64,10 +70,7 @@ aws-display-assumed-role
   Print current values of AWS assumed role environment vars
   
 aws-whoami
-  Print output of 'aws sts get-caller-identity'
-  
-aws-env
-  Print current values of all AWS environment vars
+  Print output of 'aws sts get-caller-identity
 
 aws-export-env
   Cache AWS environment vars to local file for use by other shells
@@ -87,7 +90,8 @@ aws-unset-mfa-token
 
   # Run each command with -h option for full usage info.
 
-  aws-profile <profile>
+  aws-profile [<profile>]
+  aws-region [<region>]
   aws-set-mfa-token
   aws-make-config
   aws-list-roles
