@@ -19,7 +19,7 @@ aws-region ()
   if [ $# -gt 0 ]; then
     case $1 in
       '-h' ) echo "Set or display value of shell environment var AWS_DEFAULT_PROFILE";;
-      * ) export AWS_DEFAULT_REGION=$region;;
+      * ) export AWS_DEFAULT_REGION=$1;;
     esac
   else
       echo $AWS_DEFAULT_REGION;
